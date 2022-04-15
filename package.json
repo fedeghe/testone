@@ -1,0 +1,22 @@
+{
+    "name": "@fedeghe/testone",
+    "version": "0.0.1",
+    "description": "small testing utility",
+    "scripts": {
+        "build": "malta source/build.json",
+        "test": "echo 'not yet'"
+    },
+    "main": "index.js",
+    "repository": "https://github.com/fedeghe/testone.git",
+    "keywords": [
+        "test",
+        "micro test"
+    ],
+    "author": "fedeghe <fedeghe@gmail.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "malta": "^4.1.35",
+        "malta-header-comment": "^1.0.12",
+        "malta-millijs": "^1.0.5"
+    }
+}

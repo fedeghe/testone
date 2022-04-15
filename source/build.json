@@ -1,0 +1,3 @@
+{
+    "source/index.js": ". -plugins=malta-millijs...malta-header-comment[name:'source/head.txt']"
+}
