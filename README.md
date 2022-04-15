@@ -43,15 +43,15 @@ giving
 ```
 › Testing `pow`
 Passed 2 | Failed 0
-Total time 13 ms
+Total time 3 ms
 Consuming ~1.29 MB
 
 › Testing `powN`
 Passed 2 | Failed 0
-Total time 18 ms
+Total time 8 ms
 Consuming ~2.15 MB
 
 ∆ PODIUM
-1st place to `anagram`: 43 ms
-2nd place to `areAnagrams`: 58 ms
+1st place to `pow`: 3 ms
+2nd place to `pow2`: 8 ms
 ```
