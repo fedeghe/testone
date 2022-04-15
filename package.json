@@ -1,5 +1,5 @@
 {
-    "name": "@fedeghe/testone",
+    "name": "testone",
     "version": "0.0.1",
     "description": "small testing utility",
     "scripts": {
