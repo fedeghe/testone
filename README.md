@@ -12,7 +12,10 @@ const pow = (d, n) => d ** n,
         out: 8
     },{
         in: [2, 10],
-        out: 1024
+        // in case a function is specified
+        // will receive the whole result
+        // and is expected to return true
+        out: r => r === 1024
     }];
 
 // one or an array of function to test
