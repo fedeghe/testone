@@ -76,7 +76,7 @@ function testone(bs, imp, options = {}) {
         globs.sort(
             function (a, b) { return a.time - b.time }
         ).forEach(function (impl, i) {
-            console.log(`${i + 1}${['st', 'nd', 'rd',][i] || 'th'}\splace to \`${impl.name}\` : ${formatTime(impl.time)}`)
+            console.log(`${i + 1}${['st', 'nd', 'rd',][i] || 'th'} place to \`${impl.name}\` : ${formatTime(impl.time)}`)
         });
     }
 };
