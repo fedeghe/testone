@@ -1,6 +1,6 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
@@ -16,7 +16,6 @@
     "license": "MIT",
     "devDependencies": {
         "malta": "^4.1.35",
-        "malta-header-comment": "^1.0.12",
-        "malta-millijs": "^1.0.5"
+        "malta-header-comment": "^1.0.12"
     }
 }
