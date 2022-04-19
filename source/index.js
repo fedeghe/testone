@@ -1,3 +1,10 @@
+'use strict';
+/*
+  __          __
+ / /____ ___ / /____  ___  ___
+/ __/ -_|_-</ __/ _ \/ _ \/ -_)
+\__/\__/___/\__/\___/_//_/\__/  v 0.0.5
+*/
 function formatX(map, base) {
     return function (s, prec = 2) {
         if (s == 0) return `0 ${base}`;
@@ -42,8 +49,7 @@ function testone(bs, imp, options = {}) {
                 res = func
                     ? b.out(r)
                     : b.out;
-
-            if (res === true || JSON.stringify(r) === JSON.stringify(res)) {
+            if (JSON.stringify(r) === JSON.stringify(res)) {
                 stepDetail && console.log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent);
                 out.ok++;
             } else {
