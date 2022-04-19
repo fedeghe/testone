@@ -1,6 +1,6 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
