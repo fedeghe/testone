@@ -44,18 +44,18 @@ function testone(bs, imp, options = {}) {
             var end = now();
             times[i] = end - start;
 
-            var func = typeof b.out === 'function',
+            var isFunc = typeof b.out === 'function',
                 spent = formatTime(times[i] / iterations),
-                res = func
+                res = isFunc
                     ? b.out(r)
                     : b.out;
-            if (JSON.stringify(r) === JSON.stringify(res)) {
+            if ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res)) {
                 stepDetail && console.log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent);
                 out.ok++;
             } else {
                 if (stepDetail) {
                     console.log(sym[0] + ' test #' + (i + 1) + ' failed ' + spent);
-                    if (func) {
+                    if (isFunc) {
                         console.log('| expected: true');
                         console.log('| received:', res, ' (ƒ)');
                     } else {
