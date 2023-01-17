@@ -1,3 +1,9 @@
 {
-    "source/index.js": ". -plugins=malta-header-comment[name:'source/head.txt']"
+    "EXE": [
+        "rm -rf test",
+        "mkdir test"
+    ],
+    "#source/index.js": "./dist -plugins=malta-header-comment[name:'source/head.txt']",
+    "#source/test/*.js": "./test",
+    "#source/*.md": "."
 }

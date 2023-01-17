@@ -1,0 +1,9 @@
+{
+    "EXE": [
+        "rm -rf test dist",
+        "mkdir test dist"
+    ],
+    "source/index.js": "dist -plugins=malta-header-comment[name:\"source/head.txt\"]...malta-mocha ",
+    "source/test/index.js": "test -plugins=malta-mocha",
+    "source/*.md": "."
+}
