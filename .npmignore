@@ -1,2 +1,9 @@
-node_modules
-source
+.coveralls.yml
+.printVersion
+/coverage
+/node_modules
+/test
+/source
+/.nyc_output
+.eslintrc
+.eslintignore
