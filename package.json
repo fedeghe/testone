@@ -1,12 +1,15 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
-        "test": "echo 'not yet'"
+        "dev": "malta source/builddev.json",
+        "test": "mocha",
+        "cover": "nyc yarn test && nyc report --reporter=html",
+        "coveralls": "nyc yarn test && nyc report --reporter=text-lcov | coveralls"
     },
-    "main": "index.js",
+    "main": "dist/index.js",
     "repository": "https://github.com/fedeghe/testone.git",
     "keywords": [
         "test",
@@ -15,7 +18,12 @@
     "author": "fedeghe <fedeghe@gmail.com>",
     "license": "MIT",
     "devDependencies": {
+        "coveralls": "^3.1.1",
         "malta": "^4.1.35",
-        "malta-header-comment": "^1.0.12"
+        "malta-header-comment": "^1.0.12",
+        "malta-mocha": "^1.0.18",
+        "mocha": "^10.2.0",
+        "mocha-lcov-reporter": "^1.3.0",
+        "nyc": "^15.1.0"
     }
 }
