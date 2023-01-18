@@ -1,6 +1,6 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
@@ -21,6 +21,7 @@
         "coveralls": "^3.1.1",
         "malta": "^4.1.35",
         "malta-header-comment": "^1.0.12",
+        "malta-millijs": "^1.0.5",
         "malta-mocha": "^1.0.18",
         "mocha": "^10.2.0",
         "mocha-lcov-reporter": "^1.3.0",
