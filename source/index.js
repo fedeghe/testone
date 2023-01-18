@@ -1,8 +1,7 @@
-
 var testone = (function (){
     function formatX(map, base) {
         return function (s, prec = 4) {
-            if (s == 0) return `0 ${base}`;
+            if (s == 0) return '0 ' + base;
             var n = 0, nInt = 0;
             for (var i in map) {
                 if (s >= map[i] || i === base) {
@@ -12,7 +11,7 @@ var testone = (function (){
                     return [n, i].join(' ');
                 }
             }
-        }
+        };
     }
     
     var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
@@ -32,12 +31,11 @@ var testone = (function (){
             impls = (imp.constructor.name === 'Array') ? imp : [imp],
             globs = [],
             log = verbose ? function () {
-                 console.log.apply(null, arguments)
+                 console.log.apply(null, arguments);
             } : function () {};
         impls.forEach(function (impl) {
             var name = impl.name;
-            log('› Testing \`' + name + '\`');
-            
+            log('› Testing \"' + name + '\"');
             var out = { ok: 0, ko: 0 },
                 times = [],
                 sym = ['\u2717', '\u2713'],
@@ -55,9 +53,7 @@ var testone = (function (){
     
                 var isFunc = typeof bench.out === 'function',
                     spent = formatTime(times[i] / iterations),
-                    res = isFunc
-                        ? bench.out(r)
-                        : bench.out;
+                    res = isFunc ? bench.out(r) : bench.out;
                 
                 if ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res)) {
                     stepDetail && log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent);
@@ -80,9 +76,8 @@ var testone = (function (){
     
             var upEnd = now(),
                 globTime = upEnd - upStart;
-            
             if (!out.ko) globs.push({ name, time: globTime });
-            mem.end = process.memoryUsage().heapUsed
+            mem.end = process.memoryUsage().heapUsed;
             ret.mem[name] = formatSize((mem.end - mem.start) / iterations);
             if (verbose) {
                 log('Passed ' + out.ok + ' | Failed ' + out.ko);
@@ -90,25 +85,24 @@ var testone = (function (){
                 log('Consuming ~' + ret.mem[name]);
                 log('');
             }
-    
-            ret.passing[name] = out.ok && !out.ko
+            ret.passing[name] = out.ok && !out.ko;
         });
     
-    
-        
         globs.length > 1 && log('∆ PODIUM');
         globs.sort(
-            function (a, b) { return a.time - b.time }
+            function (a, b) { return a.time - b.time; }
         ).forEach(function (impl, i) {
             ret.times[impl.name] = impl.time;
             ret.rank.push(impl.name);
-            log(`${i + 1}${['st', 'nd', 'rd',][i] || 'th'} place to \`${impl.name}\`: ${formatTime(impl.time)}`)
+            log((i + 1) + (['st', 'nd', 'rd',][i] || 'th') + " place to '" + impl.name +": " + formatTime(impl.time));
         });
         return ret;
     };
-    
     return __testone;
 })();
 
-
-module.exports = testone;
+/* istanbul ignore next */
+if (typeof exports === 'object' &&
+    typeof module !== 'undefined') {
+    module.exports = testone;
+}

@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.11)
+## testone (v. 0.0.12)
 
 Quickly test one or more functions against a benchmarking set.  
 
