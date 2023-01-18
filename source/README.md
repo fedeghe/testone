@@ -32,10 +32,10 @@ Consuming ~1.21 MB
 and returns (here `res` will look like)
 ``` json 
 {
-  times: { pow: 1 },
-  passing: { pow: true },
-  mem: { pow: '64.4 B' },
-  rank: [ 'pow' ]
+  "times": { "pow": 1 },
+  "passing": { "pow": true },
+  "mem": { "pow": "64.4 B" },
+  "rank": [ "pow" ]
 }
 ```
 to disable the automatic output pass `{verbose: false}` in the 3rd param options
@@ -57,10 +57,10 @@ giving in `res`
 
 ``` json
 {
-  times: { powN: 1, pow: 2 },
-  passing: { pow: true, powN: true },
-  mem: { pow: '64.4 B', powN: '13.76 B' },
-  rank: [ 'powN', 'pow' ]
+  "times": { "powN": 1, "pow": 2 },
+  "passing": { "pow": true, "powN": true },
+  "mem": { "pow": "64.4 B", "powN": "13.76 B" },
+  "rank": [ "powN", "pow" ]
 }
 ```
 and (if `verbose:false` is not passed)
