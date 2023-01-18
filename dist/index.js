@@ -12,7 +12,7 @@ var testone = (function (){
             if (s == 0) return `0 ${base}`;
             var n = 0, nInt = 0;
             for (var i in map) {
-                if (s >= map[i]) {
+                if (s >= map[i] || i === base) {
                     n = parseFloat((s / map[i]).toFixed(prec), 10);
                     nInt = parseInt(n, 10);
                     n = n == nInt ? nInt : n;
@@ -90,7 +90,6 @@ var testone = (function (){
             
             if (!out.ko) globs.push({ name, time: globTime });
             mem.end = process.memoryUsage().heapUsed
-            // console.dir({mem})
             ret.mem[name] = formatSize((mem.end - mem.start) / iterations);
             if (verbose) {
                 log('Passed ' + out.ok + ' | Failed ' + out.ko);
