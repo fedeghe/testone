@@ -15,7 +15,7 @@ var testone = (function (){
     }
     
     var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
-        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ms'),
+        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns'),
         now = function () { return +new Date(); };
     
     function __testone(benchs, imp, options = {}) {
@@ -23,44 +23,57 @@ var testone = (function (){
                 times:{},
                 passing:{},
                 mem:{},
-                rank:[]
+                rank:[],
+                fx: {}
             },
             verbose = !!options.verbose,
-            stepDetail = !!options.stepDetail,
-            iterations = stepDetail ? 1 : (options.iterations || 1e3),
+            iterations = options.iterations || 1e3,
             impls = (imp.constructor.name === 'Array') ? imp : [imp],
             globs = [],
+            logs = [],
             log = verbose ? function () {
-                 console.log.apply(null, arguments);
+                 logs.push(arguments);
             } : function () {};
+
         impls.forEach(function (impl) {
             var name = impl.name;
             log('› Testing \"' + name + '\"');
             var out = { ok: 0, ko: 0 },
                 times = [],
-                sym = ['\u2717', '\u2713'],
-                upStart = now(),
+                sym = ['\u2717', '\u2713', '\u2200'],
+                
+                startMs = now(),
+                strategyTime,
                 mem = {
                     start: process.memoryUsage().heapUsed
                 };
     
             benchs.forEach(function (bench, i) {
-                var start = now(),
-                    j = 0, r;
-                while (j++ < iterations) r = impl.apply(null, bench.in);
-                var end = now();
-                times[i] = end - start;
-    
-                var isFunc = typeof bench.out === 'function',
-                    spent = formatTime(times[i] / iterations),
+                var benchStartMs = now(),
+                    isFunc = typeof bench.out === 'function',
+                    passing = true,
+                    j = 0,
+                    r, res, spent;
+                while (j++ < iterations) {
+                    r = impl.apply(null, bench.in);
                     res = isFunc ? bench.out(r) : bench.out;
+                    passing  = passing && ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res));
+                    // prevent futher bench executions in case the test fails
+                    if (!passing) {
+                        j = iterations;
+                    }
+                }
+
+                times[i] = now() - benchStartMs;
+                spent = formatTime(times[i] / iterations);
                 
-                if ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res)) {
-                    stepDetail && log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent);
+                if (passing) {
+                    log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent+ ' (' + sym[2] + ')');
                     out.ok++;
                 } else {
-                    if (verbose && stepDetail) {
-                        log(sym[0] + ' test #' + (i + 1) + ' failed ' + spent);
+                    out.ko++;
+                    if (verbose) {
+                        log(sym[0] + ' test #' + (i + 1) + ' failed ' + spent+ ' (' + sym[2] + ')');
                         if (isFunc) {
                             log('| expected: true');
                             log('| received:', res, ' (ƒ)');
@@ -70,19 +83,19 @@ var testone = (function (){
                         }
                         log('\'+-------');
                     }
-                    out.ko++;
                 }
             });
-    
-            var upEnd = now(),
-                globTime = upEnd - upStart;
-            if (!out.ko) globs.push({ name, time: globTime });
+
+            strategyTime = now() - startMs;
+
+            if (!out.ko) globs.push({ name, time: strategyTime });
             mem.end = process.memoryUsage().heapUsed;
-            ret.mem[name] = formatSize((mem.end - mem.start) / iterations);
+            // ret.mem[name] = formatSize(Math.abs(mem.end - mem.start) / iterations);
+            ret.mem[name] = Math.abs(mem.end - mem.start) / iterations
             if (verbose) {
                 log('Passed ' + out.ok + ' | Failed ' + out.ko);
-                log('Total time ' + formatTime(globTime, 1));
-                log('Consuming ~' + ret.mem[name]);
+                log('Total time ~' + formatTime(strategyTime, 1) + ' ('+iterations+' runs)');
+                log('Consuming ~' + ret.mem[name] + ' (' + sym[2] + ')');
                 log('');
             }
             ret.passing[name] = out.ok && !out.ko;
@@ -92,9 +105,17 @@ var testone = (function (){
         globs.sort(
             function (a, b) { return a.time - b.time; }
         ).forEach(function (impl, i) {
-            ret.times[impl.name] = impl.time;
+            var singleTime = impl.time / iterations
+            ret.times[impl.name] = formatTime(singleTime);
             ret.rank.push(impl.name);
+            ret.fx[impl.name] = parseFloat((singleTime * ret.mem[impl.name]), 10);
+            ret.mem[impl.name] = formatSize(ret.mem[impl.name]);
             log((i + 1) + (['st', 'nd', 'rd',][i] || 'th') + " place to '" + impl.name +": " + formatTime(impl.time));
+        });
+
+        // if !verbose => logs is empty 
+        logs.forEach(function (l) {
+            console.log.apply(null, l);
         });
         return ret;
     };
