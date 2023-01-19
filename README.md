@@ -1,12 +1,13 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.14)
+## testone (v. 0.0.15)
 
 Quickly test performance and correctness of one or more functions against a benchmarking set.  
 
 ```
 testone(
-    benchs <Array of bench>,
-    strat <function or Array of functions>
+    *benchs <[literal object]>,
+    *strat <ƒn OR [ƒn]>
+    options <literal object>
 );
 ```
 where:
@@ -33,7 +34,7 @@ const pow = (d, n) => d ** n,
         out: r => r === 1024
     }];
 
-// one or an array of function to test
+// one function or an array of functions to test
 var res = testone(benchs, [pow, powD], {iterations: 1e6});
 ```
 
@@ -41,11 +42,11 @@ and `res` will contain something like:
 
 ``` json 
 {
-  times: { powN: '770 ns', pow: '859 ns' },
-  passing: { pow: true, powN: true },
-  mem: { pow: '0.1533 B', powN: '0.3801 B' },
-  rank: [ 'powN', 'pow' ],
-  fx: { powN: 0.00029265544, pow: 0.000131715624 }
+  "times": { "powN": "770 ns", "pow": "859 ns" },
+  "passing": { "pow": true, "powN": true },
+  "mem": { "pow": "0.1533 B", "powN": "0.3801 B" },
+  "rank": [ "powN", "pow" ],
+  "fx": { "powN": 0.00029265544, "pow": 0.000131715624 }
 }
 ```
 
@@ -53,7 +54,7 @@ here `fx`
 aims to give an extended quick metric considering the `memory employed * time spent`
 
 ---
-## Iterations (1k default)
+### Iterations (1k default)
 To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times  
 but clearly enough this could not fit some all cases (exactly as above). 
 
