@@ -58,7 +58,6 @@ var testone = (function (){
                     r = impl.apply(null, bench.in);
                     res = isFunc ? bench.out(r) : bench.out;
                     passing  = passing && ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res));
-                    // prevent futher bench executions in case the test fails
                     if (!passing) {
                         j = iterations;
                     }
@@ -90,8 +89,7 @@ var testone = (function (){
 
             if (!out.ko) globs.push({ name, time: strategyTime });
             mem.end = process.memoryUsage().heapUsed;
-            // ret.mem[name] = formatSize(Math.abs(mem.end - mem.start) / iterations);
-            ret.mem[name] = Math.abs(mem.end - mem.start) / iterations
+            ret.mem[name] = Math.abs(mem.end - mem.start) / iterations;
             if (verbose) {
                 log('Passed ' + out.ok + ' | Failed ' + out.ko);
                 log('Total time ~' + formatTime(strategyTime, 1) + ' ('+iterations+' runs)');
@@ -105,7 +103,7 @@ var testone = (function (){
         globs.sort(
             function (a, b) { return a.time - b.time; }
         ).forEach(function (impl, i) {
-            var singleTime = impl.time / iterations
+            var singleTime = impl.time / iterations;
             ret.times[impl.name] = formatTime(singleTime);
             ret.rank.push(impl.name);
             ret.fx[impl.name] = parseFloat((singleTime * ret.mem[impl.name]), 10);
@@ -113,7 +111,6 @@ var testone = (function (){
             log((i + 1) + (['st', 'nd', 'rd',][i] || 'th') + " place to '" + impl.name +": " + formatTime(impl.time));
         });
 
-        // if !verbose => logs is empty 
         logs.forEach(function (l) {
             console.log.apply(null, l);
         });
