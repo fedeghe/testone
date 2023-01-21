@@ -1,21 +1,23 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.15)
+## testone (v. 0.0.16)
 
-Quickly test performance and correctness of one or more functions against a benchmarking set.  
+Quickly test performance and correctness of one or more functions against input/output data.  
 
 ```
 testone(
-    *benchs <[literal object]>,
+    *ios <[literal object]>,
     *strat <ƒn OR [ƒn]>
     options <literal object>
 );
 ```
 where:
-- `bench` is a simple object literal composed by:  
-    - `in` keyed array for the function inputs 
-    - `out` keyed element which can be either:  
+- `io` is a simple object literal composed by:  
+    - `in` keyed element which can be either
+        - array for the function inputs 
+        - a function supposed to return an array to be used as input values
+    - `out` keyed element which can be either
         - a static value  
-        - a function that will receive what is returned from the strategy  
+        - a function that will receive what is returned from the strategy (plus io index and iteration)  
         and it's supposed to return a _boolean_ representing the test outcome
 - `strat` the function of the array of functions one wants to check
 
@@ -23,19 +25,24 @@ where:
 ``` js 
 const pow = (d, n) => d ** n,
     powN = (d, n) => Math.pow(d, n),
-    benchs = [{
+    ios = [{
         in: [2, 3],
         out: 8
     },{
-        in: [2, 10],
+        in: [4, 3],
+        out: 64
+    },{
+        in: (ioIndex, iteration) => {
+            return [ioIndex, iteration]
+        },
         // in case a function is specified
-        // will receive the whole result
+        // will receive the whole result (+ io index and iteration)
         // and is expected to return true
-        out: r => r === 1024
+        out: (r, ioIndex, iteration) => r === ioIndex ** iteration
     }];
 
 // one function or an array of functions to test
-var res = testone(benchs, [pow, powD], {iterations: 1e6});
+var res = testone(ios, [pow, powN], {iterations: 1e6});
 ```
 
 and `res` will contain something like: 
@@ -62,4 +69,4 @@ For this reason is possible to specify in the third `options` literal object an 
 
 ---
 
-🤟 last build on 19/1/2023  
+🤟 last build on 21/1/2023  

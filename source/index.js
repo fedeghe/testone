@@ -18,13 +18,13 @@ var testone = (function (){
         formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns'),
         now = function () { return +new Date(); };
     
-    function __testone(benchs, imp, options = {}) {
+    function __testone(ios, imp, options = {}) {
         var ret = {
                 times:{},
                 passing:{},
                 mem:{},
                 rank:[],
-                fx: {}
+                fx: {},
             },
             verbose = !!options.verbose,
             iterations = options.iterations || 1e3,
@@ -48,32 +48,41 @@ var testone = (function (){
                     start: process.memoryUsage().heapUsed
                 };
     
-            benchs.forEach(function (bench, i) {
-                var benchStartMs = now(),
-                    isFunc = typeof bench.out === 'function',
+            ios.forEach(function (io, i) {
+                var ioStartMs = now(),
+                    isFuncInput = typeof io.in === 'function',
+                    isFuncOut = typeof io.out === 'function',
                     passing = true,
                     j = 0,
-                    r, res, spent;
+                    r, res, spent, input;
                 while (j++ < iterations) {
-                    r = impl.apply(null, bench.in);
-                    res = isFunc ? bench.out(r) : bench.out;
-                    passing  = passing && ((isFunc && res ) || JSON.stringify(r) === JSON.stringify(res));
+                    input = isFuncInput ? io.in(i, j) : io.in;
+                    r = impl.apply(null, input);
+                    res = isFuncOut ? io.out(r, i, j) : io.out;
+                    passing  = passing && ((isFuncOut && res ) || JSON.stringify(r) === JSON.stringify(res));
                     if (!passing) {
                         j = iterations;
                     }
                 }
 
-                times[i] = now() - benchStartMs;
+                times[i] = now() - ioStartMs;
                 spent = formatTime(times[i] / iterations);
                 
                 if (passing) {
-                    log(sym[1] + ' test #' + (i + 1) + ' passed ' + spent+ ' (' + sym[2] + ')');
+                    log(sym[1] + ' io #' + (i + 1) + ' passed ' + spent+ ' (' + sym[2] + ')');
                     out.ok++;
                 } else {
                     out.ko++;
+                    ret.err = ret.err || {};
+                    ret.err[name] = ret.err[name] || [];
+                    ret.err[name].push({
+                        ioIndex: i,
+                        received: isFuncOut ? res : r,
+                        expected: isFuncOut ? true : res,
+                    });
                     if (verbose) {
-                        log(sym[0] + ' test #' + (i + 1) + ' failed ' + spent+ ' (' + sym[2] + ')');
-                        if (isFunc) {
+                        log(sym[0] + ' io #' + (i + 1) + ' failed ' + spent+ ' (' + sym[2] + ')');
+                        if (isFuncOut) {
                             log('| expected: true');
                             log('| received:', res, ' (ƒ)');
                         } else {
