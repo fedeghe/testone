@@ -1,7 +1,6 @@
 node_modules
 coverage
 .nyc_output
-test
 .printVersion
 .coveralls.yml
 try.js
