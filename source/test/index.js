@@ -22,7 +22,6 @@ describe('basic testone', () => {
             out: r => r === 24
         }], [fib1, fib2], {iterations:1e3});
 
-        console.log(JSON.stringify(res, null, 2))
         // rank
         assert.ok(res.rank.includes('fib1'));
         assert.ok(res.rank.includes('fib2'));
