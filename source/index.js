@@ -13,10 +13,11 @@ var testone = (function (){
             }
         };
     }
+    function now() {return +new Date();}
+    function isFunction(f){return typeof f === 'function';}
     
-    var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
-        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns'),
-        now = function () { return +new Date(); };
+    var formatSize = formatX({ /* no we will not need more :D  */GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
+        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
     
     function __testone(ios, imp, options = {}) {
         var ret = {
@@ -24,107 +25,126 @@ var testone = (function (){
                 passing:{},
                 mem:{},
                 rank:[],
-                fx: {},
+                // fx: {},
+                metrics : {}
             },
-            verbose = !!options.verbose,
             iterations = options.iterations || 1e3,
+            metrics = options.metrics || false,
             impls = (imp.constructor.name === 'Array') ? imp : [imp],
-            globs = [],
-            logs = [],
-            log = verbose ? function () {
-                 logs.push(arguments);
-            } : function () {};
-
+            globs = [];
+        
+        // strategies
         impls.forEach(function (impl) {
-            var name = impl.name;
-            log('› Testing \"' + name + '\"');
-            var out = { ok: 0, ko: 0 },
+            var name = impl.name,
+                out = { pass: 0, fail: 0 },
                 times = [],
-                sym = ['\u2717', '\u2713', '\u2200'],
-                
-                startMs = now(),
-                strategyTime,
                 mem = {
                     start: process.memoryUsage().heapUsed
-                };
-    
+                },
+                strategyStart = now(),
+                strategyEnd = 0,
+                strategyPassingFlag = false,
+                strategyPassing = false,
+                strategyTime;
+
+            // test case
             ios.forEach(function (io, i) {
-                var ioStartMs = now(),
-                    isFuncInput = typeof io.in === 'function',
-                    isFuncOut = typeof io.out === 'function',
-                    passing = true,
-                    j = 0,
-                    r, res, spent, input;
+                var isFuncInput = isFunction(io.in),
+                    isFuncOut = isFunction(io.out),
+                    j = 0, r, output, input,
+                    ranOnce = false,
+                //================================
+                    ioStart = now(),
+                    ioEnd = 0;
+
                 while (j++ < iterations) {
                     input = isFuncInput ? io.in(i, j) : io.in;
                     r = impl.apply(null, input);
-                    res = isFuncOut ? io.out(r, i, j) : io.out;
-                    passing  = passing && ((isFuncOut && res ) || JSON.stringify(r) === JSON.stringify(res));
-                    if (!passing) {
+                    output = isFuncOut ? io.out(r, i, j) : io.out;
+                    if (!ranOnce) {
+                        strategyPassingFlag = ((isFuncOut && output ) || JSON.stringify(r) === JSON.stringify(output));
+                        ranOnce = true;
+                    }
+                    // if the test fail prevent further itertions
+                    if (!strategyPassingFlag) {
                         j = iterations;
                     }
                 }
+                ioEnd = now();
+                times[i] = ioEnd - ioStart;
+                //================================
 
-                times[i] = now() - ioStartMs;
-                spent = formatTime(times[i] / iterations);
-                
-                if (passing) {
-                    log(sym[1] + ' io #' + (i + 1) + ' passed ' + spent+ ' (' + sym[2] + ')');
-                    out.ok++;
+                // spent = formatTime(times[i] / iterations);
+                if (strategyPassingFlag) {
+                    out.pass++;
                 } else {
-                    out.ko++;
+                    out.fail++;
                     ret.err = ret.err || {};
                     ret.err[name] = ret.err[name] || [];
                     ret.err[name].push({
                         ioIndex: i,
-                        received: isFuncOut ? res : r,
-                        expected: isFuncOut ? true : res,
+                        received: isFuncOut ? output : r,
+                        expected: isFuncOut ? true : output,
                     });
-                    if (verbose) {
-                        log(sym[0] + ' io #' + (i + 1) + ' failed ' + spent+ ' (' + sym[2] + ')');
-                        if (isFuncOut) {
-                            log('| expected: true');
-                            log('| received:', res, ' (ƒ)');
-                        } else {
-                            log('| expected:', res);
-                            log('| received:', r);
-                        }
-                        log('\'+-------');
-                    }
-                }
+                }//reset it for next
+                strategyPassingFlag = false
             });
 
-            strategyTime = now() - startMs;
+            strategyEnd = now();
+            strategyTime = strategyEnd - strategyStart;
+            strategyPassing = !!(out.pass && !out.fail);
 
-            if (!out.ko) globs.push({ name, time: strategyTime });
+            if (strategyPassing) {
+                globs.push({ name, time: strategyTime });
+            }
             mem.end = process.memoryUsage().heapUsed;
             ret.mem[name] = Math.abs(mem.end - mem.start) / iterations;
-            if (verbose) {
-                log('Passed ' + out.ok + ' | Failed ' + out.ko);
-                log('Total time ~' + formatTime(strategyTime, 1) + ' ('+iterations+' runs)');
-                log('Consuming ~' + ret.mem[name] + ' (' + sym[2] + ')');
-                log('');
-            }
-            ret.passing[name] = out.ok && !out.ko;
+            ret.passing[name] = strategyPassing;
+
+
+
         });
     
-        globs.length > 1 && log('∆ PODIUM');
         globs.sort(
             function (a, b) { return a.time - b.time; }
         ).forEach(function (impl, i) {
+            var name = impl.name;
             var singleTime = impl.time / iterations;
-            ret.times[impl.name] = formatTime(singleTime);
-            ret.rank.push(impl.name);
-            ret.fx[impl.name] = parseFloat((singleTime * ret.mem[impl.name]), 10);
-            ret.mem[impl.name] = formatSize(ret.mem[impl.name]);
-            log((i + 1) + (['st', 'nd', 'rd',][i] || 'th') + " place to '" + impl.name +": " + formatTime(impl.time));
-        });
+            ret.times[name] = {
+                withLabel: formatTime(singleTime),
+                raw: singleTime
+            };
+            ret.rank.push(name);
+            ret.singleTime = singleTime
+            const tmp = ret.mem[name]
+            ret.mem[name] = {
+                withLabel: formatSize(tmp),
+                raw: tmp
+            };
 
-        logs.forEach(function (l) {
-            console.log.apply(null, l);
+            if (metrics) {
+                ret.metrics[name] = {}
+                ret.metrics = Object.entries(metrics).reduce((acc, [metricName, metricFunc]) => {
+                    const params = {
+                        time: ret.times[name].raw,
+                        passing: ret.passing[name],
+                        mem: ret.mem[name].raw,
+                        rank: ret.rank.indexOf(name),
+                    }
+                    acc[name][metricName] = metricFunc(params)
+                    return acc
+                }, ret.metrics);
+            }
+            
+            
         });
+        
         return ret;
     };
+
+    __testone.formatSize = formatSize;
+    __testone.formatTime = formatTime;
+
     return __testone;
 })();
 

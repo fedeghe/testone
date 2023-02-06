@@ -6,12 +6,12 @@ Quickly test performance and correctness of one or more functions against input/
 ```
 testone(
     *ios <[literal object]>,
-    *strat <ƒn OR [ƒn]>
+    *strategies <ƒn OR [ƒn]>,
     options <literal object>
 );
 ```
 where:
-- `io` is a simple object literal composed by:  
+- `io` must be an array of object literal keyed as follows:  
     - `in` keyed element which can be either
         - array for the function inputs 
         - a function supposed to return an array to be used as input values
@@ -49,16 +49,31 @@ and `res` will contain something like:
 
 ``` json 
 {
-  "times": { "powN": "770 ns", "pow": "859 ns" },
-  "passing": { "pow": true, "powN": true },
-  "mem": { "pow": "0.1533 B", "powN": "0.3801 B" },
-  "rank": [ "powN", "pow" ],
-  "fx": { "powN": 0.00029265544, "pow": 0.000131715624 }
+    "times": {
+        "powN": {
+            "withLabel": "770 ns",
+            "raw": 0.00077 // ms
+        },
+        "pow": {
+            "withLabel":"859 ns",
+            "raw": 0.000859 // ms
+        }
+    },
+    "passing": { "pow": true, "powN": true },
+    "mem": {
+        "pow": {
+            "withLabel": "0.1533 B",
+            "raw": 0.1533 // Bytes
+        },
+        "powN": {
+            "withLabel": "0.3801 B",
+            "raw": 0.3801 // Bytes
+        },
+    },
+    "rank": [ "powN", "pow" ],
+    "metrics": {}
 }
 ```
-
-here `fx`   
-aims to give an extended quick metric considering the `memory employed * time spent`
 
 ---
 ### Iterations (1k default)
@@ -66,6 +81,32 @@ To get a more accurate times & memory measurerements by default _testone_ runs e
 but clearly enough this could not fit some all cases (exactly as above). 
 
 For this reason is possible to specify in the third `options` literal object an integer parameter keyed `iterations`  
+
+---
+### Metrics
+
+In the results ss an empty object by default but can contain some additional data we might want to compute out of the results:    
+for example we could have a mixed indication fo the _memory consumption_ and _time spent_ in **one single value** passing in the options one (or more) function(s):
+``` js
+{ // in metrics
+    /* will be invoked passing 
+    {
+        time: float ms,
+        passing: boolean,
+        mem: float in Bytes,
+        rank: integer
+    }
+    */
+    aLabel: ({time, mem}) => time * mem
+}
+```
+and now in the returned metrics object we'll find somthing like:
+``` json
+"aLabel": {
+    "pow": 3.14,
+    "powN": 4345.4
+} 
+```
 
 ---
 

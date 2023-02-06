@@ -1,37 +1,18 @@
 const assert = require('assert'),
     testone = require('../source/index.js'),
-
     fib1 = n => {
-        if (n === 1) return 1
-        else return n * fib1(n - 1)
+        if (n === 1) return 1;
+        else return n * fib1(n - 1);
     },
     fib2 = n => {
         let r = n
         while (n > 1) r *= --n;
-        return r
+        return r;
     },
     fib3 = () => 6,
-    fib4 = () => 6,
-    identity = n => n;
-
+    fib4 = () => 6;
 
 describe('basic testone', () => {
-
-    beforeEach(() => {
-        oldConsoleLog = console.log;
-        console.log = () => {
-            console.log.calls.push([].slice.call(arguments))
-        }
-        console.log.calls = [];
-        console.log.reset = () => {
-            console.log.calls = [];
-        };
-    });
-
-    afterEach(() => {
-        console.log.calls = [];
-    });
-
     it('should return the expected values', () => {
         var res = testone([{
             in: [10],
@@ -39,15 +20,31 @@ describe('basic testone', () => {
         },{
             in: [4],
             out: r => r === 24
-        }], [fib1, fib2], {iterations:1e3})
+        }], [fib1, fib2], {iterations:1e3});
+
+        console.log(JSON.stringify(res, null, 2))
+        // rank
         assert.ok(res.rank.includes('fib1'));
         assert.ok(res.rank.includes('fib2'));
+
+        // mem
         assert.ok('fib1' in res.mem);
+        assert.ok('withLabel' in res.mem.fib1);
+        assert.ok('raw' in res.mem.fib1);
         assert.ok('fib2' in res.mem);
+        assert.ok('withLabel' in res.mem.fib2);
+        assert.ok('raw' in res.mem.fib2);
+
         assert.ok('fib1' in res.times);
+        assert.ok('withLabel' in res.times.fib1);
+        assert.ok('raw' in res.times.fib1);
         assert.ok('fib2' in res.times);
+        assert.ok('withLabel' in res.times.fib2);
+        assert.ok('raw' in res.times.fib2);
+
         assert.ok(res.passing.fib1);
         assert.ok(res.passing.fib2);
+        assert(!('err' in res));
     });
 
     it('should return the expected values, single implementaion', () => {
@@ -57,50 +54,151 @@ describe('basic testone', () => {
         },{
             in: [4],
             out: r => r === 24
-        }], fib1, {iterations:1e3})
+        }], fib1, {iterations:1e3});
         assert.ok(res.rank.includes('fib1'));
         assert.ok('fib1' in res.mem);
         assert.ok('fib1' in res.times);
         assert.ok(res.passing.fib1);
+        assert(!('err' in res));
     });
 
     it('should fail as expected', () => {
         var res = testone([{
             in: [10],
             out: 1
-        }], [fib1, fib2])
+        }], [fib1, fib2]);
         assert.ok(!res.passing.fib1);
         assert.ok(!res.passing.fib2);
-        assert.strictEqual(console.log.calls.length, 0);
+        assert('err' in res);
     });
 
-    it('should be verbose as expected', () => {
-        testone([{
+    it('should work as expected when using functions', () => {
+        var res = testone([{
             in: [3],
             out: 6
         },{
             in: [3],
             out: function(n){ return n===6}
-        }], [fib1, fib2, fib3, fib4], {verbose: true, iterations: 1})
-        assert.ok(console.log.calls.length);
+        },{
+            in: function () {return [3]},
+            out: 6
+        },{
+            in: function () {return [3]},
+            out: function(n){ return n===6}
+        }], [fib1, fib2, fib3, fib4]);
+        assert(!('err' in res));
+        assert.ok(res.passing.fib1);
     });
 
-    it('should fail verbose as expected', () => {
-        testone([{
+    it('should work as expected when fails using functions', () => {
+        var ios = [{
+                in: [3],
+                out: 3
+            },{
+                in: [3],
+                out: function(n){ return n===3}
+            },{
+                in: function () {return [3]},
+                out: 3
+            },{
+                in: function () {return [3]},
+                out: function(n){ return n===3}
+            }],
+            strats = [fib1, fib2, fib3, fib4],
+            res = testone(ios, strats);
+        
+        assert('err' in res);
+        assert.ok(!res.passing.fib1);
+        assert.ok(!res.passing.fib2);
+        assert.ok(!res.passing.fib3);
+        assert.ok(!res.passing.fib4);
+        strats.forEach(strat => {
+            var name = strat.name;
+            ios.forEach((io, i) => {
+                assert('received' in res.err[name][i]);
+                assert('expected' in res.err[name][i]);
+                assert('ioIndex' in res.err[name][i]);
+                assert(res.err[name][i].ioIndex === i);
+                assert(res.err[name][i].received !== res.err[name][i].expected);
+            })
+        });
+    });
+
+    it('should work as expected when using metrics', () => {
+        var res = testone([{
             in: [3],
-            out: 2
+            out: 6
         },{
             in: [3],
-            out: function(n){ return n===2}
-        }], [fib1, fib2, fib3], {verbose: true, iterations: 1})
-        assert.ok(console.log.calls.length);
+            out: function(n){ return n===6}
+        },{
+            in: function () {return [3]},
+            out: 6
+        },{
+            in: function () {return [3]},
+            out: function(n){ return n===6}
+        }],
+        [fib1, fib2],
+        {
+            metrics: {
+                x : ({time, mem}) =>  time * mem,
+                y : ({mem}) => mem * 2
+            }
+        })
+        
+        assert.ok(res.passing.fib1);
+        assert.ok(res.passing.fib2);
+    });
+});
+
+describe('static testone', () => {
+    it('should work as expected testone.formatTime', () => {
+        //just to have a name
+        function fn(x) {return testone.formatTime(x)}
+        var res = testone([{
+            in: [1e4],
+            out: '10 s'
+        },{
+            in: [10],
+            out: '10 ms'
+        },{
+            in: [0.001],
+            out: '1 µs'
+        },{
+            in: [0.000001],
+            out: '1 ns'
+        },{
+            in: [0],
+            out: '0 ns'
+        }], [fn])
+        assert(!('err' in res))
+        assert.ok(res.passing.fn);
     });
 
-    it('should work as expected when using functions on both input/output', () => {
-        testone([{
-            in: function (n, j) { return [n*j]},
-            out: function (r, n, j) { return r === n*j ? r : null;}
-        }], [identity], {verbose: true, iterations: 1})
-        assert.ok(console.log.calls.length);
+    it('should work as expected testone.formatSize', () => {
+        //just to have a name
+        function fn(x) {return testone.formatSize(x)}
+        var res = testone([{
+            in: [2**30],
+            out: '1 GB'
+        },{
+            in: [2**20],
+            out: '1 MB'
+        },{
+            in: [1025],
+            out: '1.001 KB'
+        },{
+            in: [1024],
+            out: '1 KB'
+        },{
+            in: [1023],
+            out: '1023 B'
+        },{
+            in: [0],
+            out: '0 B'
+        }], [fn])
+    
+        assert(!('err' in res))
+        assert.ok(res.passing.fn);
     });
 });
