@@ -25,13 +25,13 @@ var testone = (function (){
                 passing:{},
                 mem:{},
                 rank:[],
-                // fx: {},
-                metrics : {}
             },
             iterations = options.iterations || 1e3,
             metrics = options.metrics || false,
             impls = (imp.constructor.name === 'Array') ? imp : [imp],
             globs = [];
+
+        if (metrics) ret.metrics = {};
         
         // strategies
         impls.forEach(function (impl) {
@@ -53,6 +53,7 @@ var testone = (function (){
                     isFuncOut = isFunction(io.out),
                     j = 0, r, output, input,
                     ranOnce = false,
+
                 //================================
                     ioStart = now(),
                     ioEnd = 0;
@@ -100,9 +101,6 @@ var testone = (function (){
             mem.end = process.memoryUsage().heapUsed;
             ret.mem[name] = Math.abs(mem.end - mem.start) / iterations;
             ret.passing[name] = strategyPassing;
-
-
-
         });
     
         globs.sort(
@@ -115,7 +113,6 @@ var testone = (function (){
                 raw: singleTime
             };
             ret.rank.push(name);
-            ret.singleTime = singleTime
             const tmp = ret.mem[name]
             ret.mem[name] = {
                 withLabel: formatSize(tmp),
