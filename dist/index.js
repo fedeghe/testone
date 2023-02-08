@@ -23,10 +23,11 @@ var testone = (function (){
     function now() {return +new Date();}
     function isFunction(f){return typeof f === 'function';}
     
-    var formatSize = formatX({ /* no we will not need more :D  */GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
+    var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
         formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
     
-    function __testone(ios, imp, options = {}) {
+    function __testone(ios, imp, options) {
+        options = options || {};
         var ret = {
                 times:{},
                 passing:{},
@@ -103,7 +104,10 @@ var testone = (function (){
             strategyPassing = !!(out.pass && !out.fail);
 
             if (strategyPassing) {
-                globs.push({ name, time: strategyTime });
+                globs.push({
+                    name: name,
+                    time: strategyTime
+                });
             }
             mem.end = process.memoryUsage().heapUsed;
             ret.mem[name] = Math.abs(mem.end - mem.start) / iterations;
@@ -112,15 +116,15 @@ var testone = (function (){
     
         globs.sort(
             function (a, b) { return a.time - b.time; }
-        ).forEach(function (impl, i) {
-            var name = impl.name;
-            var singleTime = impl.time / iterations;
+        ).forEach(function (impl) {
+            var name = impl.name,
+                singleTime = impl.time / iterations,
+                tmp = ret.mem[name];
             ret.times[name] = {
                 withLabel: formatTime(singleTime),
                 raw: singleTime
             };
             ret.rank.push(name);
-            const tmp = ret.mem[name]
             ret.mem[name] = {
                 withLabel: formatSize(tmp),
                 raw: tmp
@@ -129,7 +133,7 @@ var testone = (function (){
             if (metrics) {
                 ret.metrics[name] = {}
                 ret.metrics = Object.entries(metrics).reduce((acc, [metricName, metricFunc]) => {
-                    const params = {
+                    var params = {
                         time: ret.times[name].raw,
                         passing: ret.passing[name],
                         mem: ret.mem[name].raw,
@@ -139,8 +143,6 @@ var testone = (function (){
                     return acc
                 }, ret.metrics);
             }
-            
-            
         });
         
         return ret;

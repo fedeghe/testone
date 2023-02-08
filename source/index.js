@@ -19,7 +19,7 @@ var testone = (function (){
     var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
         formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
     
-    function __testone(ios, imp) {
+    function __testone(ios, imp, options) {
         options = options || {};
         var ret = {
                 times:{},
