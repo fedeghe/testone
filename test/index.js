@@ -1,16 +1,16 @@
 const assert = require('assert'),
     testone = require('../source/index.js'),
-    fib1 = n => {
+    fac1 = n => {
         if (n === 1) return 1;
-        else return n * fib1(n - 1);
+        else return n * fac1(n - 1);
     },
-    fib2 = n => {
+    fac2 = n => {
         let r = n
         while (n > 1) r *= --n;
         return r;
     },
-    fib3 = () => 6,
-    fib4 = () => 6;
+    fac3 = () => 6,
+    fac4 = () => 6;
 
 describe('basic testone', () => {
 
@@ -24,22 +24,20 @@ describe('basic testone', () => {
         },{
             in: [4],
             out: r => r === 24
-        }], fib1, {iterations:1e3});
+        }], fac1, {iterations:1e3});
 
-        assert.ok(res.rank.includes('fib1'));
-        // console.log(JSON.stringify(res, null, 2))
         fields1.forEach(k => {
-            assert.ok('fib1' in res[k]);
+            assert.ok('fac1' in res[k]);
             fields2.forEach(j => {
-                assert.ok(j in res[k].fib1)
+                assert.ok(j in res[k].fac1)
             });
         });
-        assert.ok(res.passing.fib1);
+        assert.ok(res.passing.fac1);
         assert(!('err' in res));
     });
 
     it('should return the expected values , more strategies', () => {
-        var fns = [fib1, fib2],
+        var fns = [fac1, fac2],
             res = testone([{
                 in: [10],
                 out: 3628800
@@ -49,7 +47,7 @@ describe('basic testone', () => {
             }], fns, {iterations:1e3});
         fns.forEach(fn => {
             var name = fn.name;
-            assert.ok(res.rank.includes(name));
+            
             fields1.forEach(n => {
                 assert.ok(name in res[n]);
                 fields2.forEach(k => 
@@ -62,7 +60,7 @@ describe('basic testone', () => {
     });
 
     it('should fail as expected', () => {
-        var fns = [fib1, fib2],
+        var fns = [fac1, fac2],
             res = testone([{
                 in: [10],
                 out: 1
@@ -86,13 +84,13 @@ describe('basic testone', () => {
         },{
             in: () => [3],
             out: n => n ===6
-        }], [fib1, fib2, fib3, fib4]);
+        }], [fac1, fac2, fac3, fac4]);
         assert(!('err' in res));
-        assert.ok(res.passing.fib1);
+        assert.ok(res.passing.fac1);
     });
 
     it('should work as expected when fails using functions', () => {
-        var strats = [fib1, fib2, fib3, fib4],
+        var strats = [fac1, fac2, fac3, fac4],
             ios = [{
                 in: [3],
                 out: 3
@@ -124,7 +122,7 @@ describe('basic testone', () => {
     });
 
     it('should work as expected when using metrics', () => {
-        var fns = [fib1, fib2],
+        var fns = [fac1, fac2],
             res = testone([{
                 in: [3],
                 out: 6

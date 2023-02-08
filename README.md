@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.18)
+## testone (v. 0.0.19)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -70,7 +70,6 @@ and `res` will contain something like:
             "raw": 0.3801 // Bytes
         },
     },
-    "rank": [ "powN", "pow" ],
     "metrics": {}
 }
 ```
@@ -100,14 +99,14 @@ for example we could have a mixed indication fo the _memory consumption_ and _ti
     aLabel: ({time, mem}) => time * mem
 }
 ```
-and now in the returned metrics object we'll find somthing like:
+and now in the returned metrics object we'll find something like:
 ``` json
 "aLabel": {
-    "pow": 3.14,
-    "powN": 4345.4
+    "pow": 0.00012342,
+    "powN": 0.00923412
 } 
 ```
 
 ---
 
-🤟 last build on 8/2/2023  
+🤟 last build on 9/2/2023  

@@ -25,23 +25,22 @@ var testone = (function (){
                 times:{},
                 passing:{},
                 mem:{},
-                rank:[],
             },
             iterations = options.iterations || 1e3,
             metrics = options.metrics || false,
-            impls = (imp.constructor.name === 'Array') ? imp : [imp],
-            globs = [];
+            strategies = (imp.constructor.name === 'Array') ? imp : [imp],
+            globs = [],
+            strategyMem = {};
 
         if (metrics) ret.metrics = {};
         
         // strategies
-        impls.forEach(function (impl) {
-            var name = impl.name,
+        strategies.forEach(function (strategy) {
+            var name = strategy.name,
                 out = { pass: 0, fail: 0 },
                 times = [],
-                mem = {
-                    start: process.memoryUsage().heapUsed
-                },
+                memStart = process.memoryUsage().heapUsed,
+                memEnd = 0,
                 strategyStart = now(),
                 strategyEnd = 0,
                 strategyPassingFlag = false,
@@ -61,7 +60,7 @@ var testone = (function (){
 
                 while (j++ < iterations) {
                     input = isFuncInput ? io.in(i, j) : io.in;
-                    r = impl.apply(null, input);
+                    r = strategy.apply(null, input);
                     output = isFuncOut ? io.out(r, i, j) : io.out;
                     if (!ranOnce) {
                         strategyPassingFlag = ((isFuncOut && output ) || JSON.stringify(r) === JSON.stringify(output));
@@ -102,42 +101,41 @@ var testone = (function (){
                     time: strategyTime
                 });
             }
-            mem.end = process.memoryUsage().heapUsed;
-            ret.mem[name] = Math.abs(mem.end - mem.start) / iterations;
+            memEnd = process.memoryUsage().heapUsed;
+            strategyMem[name] = Math.abs(memEnd - memStart) / iterations;
             ret.passing[name] = strategyPassing;
         });
     
         globs.sort(
             function (a, b) { return a.time - b.time; }
-        ).forEach(function (impl) {
-            var name = impl.name,
-                singleTime = impl.time / iterations,
-                tmp = ret.mem[name];
+        ).forEach(function (strategy) {
+            var name = strategy.name,
+                singleTime = strategy.time / iterations;
             ret.times[name] = {
                 withLabel: formatTime(singleTime),
                 raw: singleTime
             };
-            ret.rank.push(name);
             ret.mem[name] = {
-                withLabel: formatSize(tmp),
-                raw: tmp
+                withLabel: formatSize(strategyMem[name]),
+                raw: strategyMem[name]
             };
+        });
+        
+        if (metrics) {
+            ret.metrics = Object.entries(metrics).reduce((acc, [metricName, metricFunc]) => {
+                globs.forEach(function(glob) {
 
-            if (metrics) {
-                ret.metrics[name] = {}
-                ret.metrics = Object.entries(metrics).reduce((acc, [metricName, metricFunc]) => {
-                    var params = {
+                    var name = glob.name
+                    acc[metricName] = acc[metricName] || {}
+                    acc[metricName][name] = metricFunc({
                         time: ret.times[name].raw,
                         passing: ret.passing[name],
                         mem: ret.mem[name].raw,
-                        rank: ret.rank.indexOf(name),
-                    }
-                    acc[name][metricName] = metricFunc(params)
-                    return acc
-                }, ret.metrics);
-            }
-        });
-        
+                    })
+                });
+                return acc;
+            }, {});
+        }
         return ret;
     };
 

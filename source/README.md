@@ -70,7 +70,6 @@ and `res` will contain something like:
             "raw": 0.3801 // Bytes
         },
     },
-    "rank": [ "powN", "pow" ],
     "metrics": {}
 }
 ```
@@ -100,11 +99,11 @@ for example we could have a mixed indication fo the _memory consumption_ and _ti
     aLabel: ({time, mem}) => time * mem
 }
 ```
-and now in the returned metrics object we'll find somthing like:
+and now in the returned metrics object we'll find something like:
 ``` json
 "aLabel": {
-    "pow": 3.14,
-    "powN": 4345.4
+    "pow": 0.00012342,
+    "powN": 0.00923412
 } 
 ```
 
