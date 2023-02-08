@@ -146,6 +146,10 @@ describe('basic testone', () => {
         fns.forEach(fn => 
             assert.ok(res.passing[fn.name])
         );
+        assert(res.metrics.x.fac1 === res.mem.fac1.raw * res.times.fac1.raw)
+        assert(res.metrics.x.fac2 === res.mem.fac2.raw * res.times.fac2.raw)
+        assert(res.metrics.y.fac1 === res.mem.fac1.raw * 2)
+        assert(res.metrics.y.fac2 === res.mem.fac2.raw * 2)
     });
 });
 
