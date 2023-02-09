@@ -99,7 +99,7 @@ for example we could have a mixed indication fo the _memory consumption_ and _ti
     aLabel: ({time, mem}) => time * mem
 }
 ```
-and now in the returned metrics object we'll find something like:
+and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
 ``` json
 "aLabel": {
     "pow": 0.00012342,

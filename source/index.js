@@ -122,19 +122,36 @@ var testone = (function (){
         });
         
         if (metrics) {
-            ret.metrics = Object.entries(metrics).reduce((acc, [metricName, metricFunc]) => {
+            ret.metrics = Object.entries(metrics).reduce(function (acc, [metricName, metricFunc]) {
                 globs.forEach(function(glob) {
-
-                    var name = glob.name
-                    acc[metricName] = acc[metricName] || {}
-                    acc[metricName][name] = metricFunc({
-                        time: ret.times[name].raw,
-                        passing: ret.passing[name],
-                        mem: ret.mem[name].raw,
+                    var name = glob.name;
+                    acc[metricName] = acc[metricName] || [];
+                    acc[metricName].push({
+                        [name]: metricFunc({
+                            time: ret.times[name].raw,
+                            passing: ret.passing[name],
+                            mem: ret.mem[name].raw,
+                        })
+                    });
+                    acc[metricName].sort(function(a, b) {
+                        return Object.values(a)[0] - Object.values(b)[0]
                     })
                 });
                 return acc;
             }, {});
+
+            ret.metrics = Object.entries(ret.metrics).reduce(function (acc, el) {
+                var metric = el[0],
+                    values = el[1];
+                acc[metric] = values.reduce(function (accI, el){
+                    var k = Object.keys(el)[0],
+                        v = Object.values(el)[0]
+                    accI[k] = v;
+                    return accI;
+                }, {});
+                return acc;
+            }, {});
+            
         }
         return ret;
     };
