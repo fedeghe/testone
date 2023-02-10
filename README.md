@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.21)
+## testone (v. 0.0.22)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -109,4 +109,4 @@ and now in the returned metrics object we'll find for each metric something like
 
 ---
 
-🤟 last build on 9/2/2023  
+🤟 last build on 10/2/2023  

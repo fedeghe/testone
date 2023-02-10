@@ -88,7 +88,7 @@ var testone = (function (){
                         expected: isFuncOut ? true : output,
                     });
                 }//reset it for next
-                strategyPassingFlag = false
+                strategyPassingFlag = false;
             });
 
             strategyEnd = now();
@@ -134,7 +134,7 @@ var testone = (function (){
                         })
                     });
                     acc[metricName].sort(function(a, b) {
-                        return Object.values(a)[0] - Object.values(b)[0]
+                        return Object.values(a)[0] - Object.values(b)[0];
                     })
                 });
                 return acc;
@@ -145,7 +145,7 @@ var testone = (function (){
                     values = el[1];
                 acc[metric] = values.reduce(function (accI, el){
                     var k = Object.keys(el)[0],
-                        v = Object.values(el)[0]
+                        v = Object.values(el)[0];
                     accI[k] = v;
                     return accI;
                 }, {});
