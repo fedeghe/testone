@@ -12,8 +12,10 @@ var size = 1e5,
         fns,
         {
             metrics: {
-                f : ({time, mem}) => time * mem
-            }
+                f : ({time, mem}) => time * mem,
+                fx : ({time, mem}) => time * mem,
+            },
+            iterations : 200
         }
     );
 console.log(JSON.stringify(r, null, 2))
