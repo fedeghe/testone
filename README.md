@@ -11,15 +11,25 @@ testone(
 );
 ```
 where:
-- `io` must be an array of object literal keyed as follows:  
-    - `in` keyed element which can be either
+- `ios` must be an array of object literal keyed as follows:  
+    - **`in`** keyed element which can be either
         - array for the function inputs 
         - a function supposed to return an array to be used as input values
-    - `out` keyed element which can be either
+    - **`out`** keyed element which can be either
         - a static value  
         - a function that will receive what is returned from the strategy (plus io index and iteration)  
         and it's supposed to return a _boolean_ representing the test outcome
-- `strat` the function of the array of functions one wants to check
+    - _`matcher`_ (optional)  
+        by default _testone_ compares the expected output with the result using the exact match between the stringyfication of the two as:  
+        ``` js
+        JSON.stringify(expected) === JSON.stringify(received)
+        ```   
+        but there might be anyway cases where a bit more flexibility is needed for a specific bechmark element, with this option is possible to override the matching function (which is anyway expected to return a boolean), e.g.:
+        ``` js
+        matcher: ({expected, received}) => received < expected 
+        ```  
+
+- `strat` the function or the array of functions one wants to test & check
 
 
 ``` js 
@@ -73,30 +83,28 @@ and `res` will contain something like:
     "metrics": {}
 }
 ```
+## Other options  
+As third parameter we can pass a literal object containing few additional things that might be usefull in some cases: 
 
----
-### Iterations (1k default)
-To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times  
-but clearly enough this could not fit some all cases (exactly as above). 
+### _**matcher**_  
+This works exactly as in the case of the single benchmark but the matcher will be used globally, sill the single case matcher can be overridden.
+### _**iterations**_  
+To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times; clearly enough this could not fit some cases (exactly as above). 
+For this reason is possible to specify in the third `options` literal object an **integer** parameter keyed `iterations`
 
-For this reason is possible to specify in the third `options` literal object an integer parameter keyed `iterations`  
+### _**metrics**_  
+when provided in the options the result will contain some additional data one might want to compute out of the results:  
+for example a mixed indication fo the _memory consumption_ and _time spent_ in **one single value**:
 
----
-### Metrics
-
-In the results ss an empty object by default but can contain some additional data we might want to compute out of the results:    
-for example we could have a mixed indication fo the _memory consumption_ and _time spent_ in **one single value** passing in the options one (or more) function(s):
 ``` js
 { // in metrics
     /* will be invoked passing 
     {
-        time: float ms,
-        passing: boolean,
-        mem: float in Bytes,
-        rank: integer
+        time: { single, total },
+        mem: { single, total }
     }
     */
-    aLabel: ({time, mem}) => time * mem
+    aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
 }
 ```
 and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
@@ -109,4 +117,4 @@ and now in the returned metrics object we'll find for each metric something like
 
 ---
 
-🤟 last build on 16/2/2023  
+🤟 last build on 17/2/2023  

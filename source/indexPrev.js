@@ -20,8 +20,7 @@ var testone = (function (){
     var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
         formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
 
-    Testone.formatSize = formatSize;
-    Testone.formatTime = formatTime;
+    
 
     function Testone(benchs, strategies, options) {
         this.benchs = benchs;
@@ -32,7 +31,7 @@ var testone = (function (){
         this.ret = {
             times:{},
             mem:{},
-            passing:{},
+            outcome :{},
         };
         this.globs = [];
         this.strategyMem = {};
@@ -51,9 +50,9 @@ var testone = (function (){
         return this;
     };
 
-    Testone.prototype.runStrategy = function(strategy, i){
+    Testone.prototype.runStrategy = function(strategy){
         var self = this,
-            name = strategy.name || ('anonimousFunction_' + i),
+            name = strategy.name,
             memStart = process.memoryUsage().heapUsed,
             memEnd = 0,
             startTime = now(),
@@ -61,8 +60,8 @@ var testone = (function (){
             passing = false,
             strategyTime,
             strategyTimeSingle;
-        var res = this.benchs.map(function (bench, i){
-            return self.runBench.call(self, bench, i, strategy)
+        var res = this.benchs.map(function (bench, j){
+            return self.runBench.call(self, bench, j, strategy)
         });
 
         endTime = now();
@@ -85,7 +84,7 @@ var testone = (function (){
             };
             
             memEnd = process.memoryUsage().heapUsed;
-            var m = parseFloat((memEnd || 0) - (memStart || 0), 10),
+            var m = parseFloat(memEnd - memStart, 10),
                 ms = m / self.iterations;
             self.ret.mem[name] = {
                 raw: {
@@ -98,7 +97,7 @@ var testone = (function (){
                 },
             };
         }
-        this.ret.passing[name] = passing || res[0].details;
+        this.ret.outcome[name] = passing || res;
     };
 
     Testone.prototype.runBench = function(io, i, strategy) {
@@ -165,10 +164,14 @@ var testone = (function (){
         return this;
     };
 
-    return function (b, s, o) {
+    function tx(b, s, o) {
         var t = new Testone(b, s, o);
         return t.run();
     };
+
+    tx.formatSize = formatSize;
+    tx.formatTime = formatTime;
+    return tx;
 })();
 
 /* istanbul ignore next */

@@ -10,7 +10,7 @@ const assert = require('assert'),
         return r;
     },
     fac3 = () => 6,
-    fac4 = () => 6;
+    fac4 = () => 1 * 2 * 3;
 
 function j(json) {
     console.log(JSON.stringify(json, null, 2))
@@ -27,8 +27,13 @@ describe('basic testone', () => {
             out: 3628800
         },{
             in: [4],
-            out: r => r === 24
+            out: ({received}) => received
+        },{
+            in: [4],
+            out: () => 24
         }], fac1, {iterations:1e3});
+
+        // j(res)
 
         fields1.forEach(k => {
             assert.ok('fac1' in res[k]);
@@ -36,8 +41,8 @@ describe('basic testone', () => {
                 assert.ok(j in res[k].fac1)
             });
         });
-        assert.ok(res.outcome.fac1);
-        assert(!('err' in res));
+        assert.ok(res.report.fac1);
+        assert(res.passing);
     });
 
     it('should return the expected values , more strategies', () => {
@@ -47,8 +52,9 @@ describe('basic testone', () => {
                 out: 3628800
             },{
                 in: [4],
-                out: r => r === 24
+                out: 24
             }], fns, {iterations:1e3});
+
         fns.forEach(fn => {
             var name = fn.name;
             
@@ -58,9 +64,9 @@ describe('basic testone', () => {
                     assert.ok(k in res[n][name])
                 );
             });
-            assert.ok(res.outcome[name]);
+            assert.ok(res.report[name]);
         });
-        assert(!('err' in res));
+        assert.ok(res.passing);
     });
 
     it('should fail as expected', () => {
@@ -73,32 +79,32 @@ describe('basic testone', () => {
                 out: 6
             }], fns);
 
-        // j(res)
+        
         fns.forEach(fn => {
-            assert(res.outcome[fn.name][0].passing === false)
-            assert(res.outcome[fn.name][1].passing)
+            assert(res.report[fn.name][0].passing === false)
+            assert(res.report[fn.name][1].passing)
         });
-        // assert('err' in res);
+        assert(!res.passing);
     });
 
     it('should work as expected when using functions', () => {
         var fns = [fac1, fac2, fac3, fac4],
             res = testone([{
                 in: [3],
-                out: 3
+                out: 6
             },{
                 in: [3],
-                out: n => n ===6
+                out: n => 6
             },{
                 in: () => [3],
                 out: 6
             },{
                 in: () => [3],
-                out: n => n ===6
+                out: n => 6
             }], fns);
-        // j(res)
 
-        fns.forEach(fn => assert.ok(res.outcome[fn.name]));
+        fns.forEach(fn => assert.ok(res.report[fn.name]));
+        assert(res.passing);
     });
 
     it('should work as expected when fails using functions', () => {
@@ -109,35 +115,34 @@ describe('basic testone', () => {
                 }
                 ,{
                     in: [3],
-                    out: n => n === 6
+                    out: n => 6
                 }
                 ,{
                     in: () => [3],
                     out: 6
                 },{
                     in: () => [3],
-                    out: n => n === 3
+                    out: n => 3
                 }
             ],
             res = testone(ios, strats);
 
-        // assert('err' in res);
         strats.forEach(strat => {
             var name = strat.name,
                 fields = ['received', 'expected', 'ioIndex'];
          
-            
             fields.forEach(k => {
-                assert(res.outcome[name][0].passing === false)
-                assert(res.outcome[name][0].details.err.ioIndex === 0)
-                assert(res.outcome[name][0].details.err.received !== res.outcome[name][0].details.err.expected)
-                assert(res.outcome[name][1].passing)
-                assert(res.outcome[name][2].passing)
-                assert(res.outcome[name][3].passing === false)
-                assert(res.outcome[name][3].details.err.ioIndex === 3)
-                assert(res.outcome[name][3].details.err.received !== res.outcome[name][3].details.err.expected)
+                assert(res.report[name][0].passing === false)
+                assert(res.report[name][0].err.ioIndex === 0)
+                assert(res.report[name][0].err.received !== res.report[name][0].err.expected)
+                assert(res.report[name][1].passing)
+                assert(res.report[name][2].passing)
+                assert(res.report[name][3].passing === false)
+                assert(res.report[name][3].err.ioIndex === 3)
+                assert(res.report[name][3].err.received !== res.report[name][3].err.expected)
             });
         });
+        assert(!res.passing);
     });
 
     it('should work as expected when using metrics', () => {
@@ -147,13 +152,13 @@ describe('basic testone', () => {
                 out: 6
             },{
                 in: [3],
-                out: n => n ===6
+                out: ({result, out}) => 6
             },{
                 in: () => [3],
                 out: 6
             },{
                 in: () => [3],
-                out: n => n === 6
+                out: () => 6
             }],
             fns,
             {
@@ -162,15 +167,57 @@ describe('basic testone', () => {
                     y : ({mem: {single: mem}}) => mem * 2
                 }
             });
+        // j(res)
         fns.forEach(fn => 
-            assert.ok(res.outcome[fn.name])
+            assert.ok(res.report[fn.name])
         );
-        res.metrics.x.forEach(m => {
-            assert(m.value === res.mem[m.name].raw.single * res.times[m.name].raw.single) 
-        })
-        res.metrics.y.forEach(m => {
-            assert(m.value === res.mem[m.name].raw.single * 2) 
-        })
+        Object.entries(res.metrics.x).forEach(([name, value]) => {
+            assert(value === res.mem[name].raw.single * res.times[name].raw.single) 
+        });
+        Object.entries(res.metrics.y).forEach(([name, value]) => {
+            assert(value === res.mem[name].raw.single * 2) 
+        });
+        assert(res.passing);
+    });
+});
+
+describe('matcher overriding', () => {
+    it('should work as expected when using a global matcher', () => {
+        var fn = (...n) => `${n.join('')}`,
+            res = testone([{
+                in: [3],
+                out: '3'
+            },{
+                in: [3,4,5],
+                out: '345'
+            }],
+            fn,
+            {
+                matcher: ({received, expected}) => `${received}` === `${expected}`
+            });
+        assert.ok(res.report[fn.name]);
+        assert(res.passing);
+    });
+
+    it('should work as expected when using a benchmark matcher', () => {
+        var fn = (...n) => `${n.join('')}`,
+            res = testone([
+                    {
+                        in: [3],
+                        out: '3.1',
+                        matcher: ({received, expected}) => `${Math.round(received)}` === `${Math.round(expected)}`
+                    },{
+                        in: [3,4,5],
+                        out: '345'
+                    }
+                ],
+                fn,
+                {
+                    matcher: ({received, expected}) => `${received}` === `${expected}`
+                }
+            );
+        assert.ok(res.report[fn.name]);
+        assert(res.passing);
     });
 });
 
@@ -194,8 +241,8 @@ describe('static testone', () => {
             in: [0],
             out: '0 ns'
         }], [fn])
-        assert(!('err' in res))
-        assert.ok(res.outcome.fn);
+        assert.ok(res.report.fn);
+        assert(res.passing);
     });
 
     it('should work as expected testone.formatSize', () => {
@@ -219,8 +266,8 @@ describe('static testone', () => {
         },{
             in: [0],
             out: '0 B'
-        }], [fn])
-        assert(!('err' in res))
-        assert.ok(res.outcome.fn);
+        }], [fn]);
+        assert.ok(res.report.fn);
+        assert(res.passing);
     });
 });
