@@ -1,10 +1,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.22)
+## testone (v. 0.0.23)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
 ```
-testone(
+var outcome = testone(
     *ios <[literal object]>,
     *strategies <ƒn OR [ƒn]>,
     options <literal object>
@@ -32,57 +32,129 @@ where:
 - `strat` the function or the array of functions one wants to test & check
 
 
-``` js 
-const pow = (d, n) => d ** n,
-    powN = (d, n) => Math.pow(d, n),
-    ios = [{
-        in: [2, 3],
-        out: 8
-    },{
-        in: [4, 3],
-        out: 64
-    },{
-        in: (ioIndex, iteration) => {
-            return [ioIndex, iteration]
+### What do it get in the `outcome`?  
+- check of the correctness
+- some relevant numberical performance informations
+
+    <details>
+    <summary>an out come will look like this</summary>
+
+    ``` js  
+    {
+        "times": {
+            "pow": {
+            "raw": {
+                "single": 0.000313,
+                "total": 313
+            },
+            "withLabel": {
+                "single": "313 ns",
+                "total": "313 ms"
+            }
+            },
+            "powN": {
+            "raw": {
+                "single": 0.000316,
+                "total": 316
+            },
+            "withLabel": {
+                "single": "316 ns",
+                "total": "316 ms"
+            }
+            }
         },
-        // in case a function is specified
-        // will receive the whole result (+ io index and iteration)
-        // and is expected to return true
-        out: (r, ioIndex, iteration) => r === ioIndex ** iteration
-    }];
-
-// one function or an array of functions to test
-var res = testone(ios, [pow, powN], {iterations: 1e6});
-```
-
-and `res` will contain something like: 
-
-``` json 
-{
-    "times": {
-        "powN": {
-            "withLabel": "770 ns",
-            "raw": 0.00077 // ms
+        "mem": {
+            "pow": {
+            "raw": {
+                "single": 0.122656,
+                "total": 122656
+            },
+            "withLabel": {
+                "single": "0.1227 B",
+                "total": "119.7813 KB"
+            }
+            },
+            "powN": {
+            "raw": {
+                "single": 0.117752,
+                "total": 117752
+            },
+            "withLabel": {
+                "single": "0.1178 B",
+                "total": "114.9922 KB"
+            }
+            }
         },
-        "pow": {
-            "withLabel":"859 ns",
-            "raw": 0.000859 // ms
+        "passing": true,
+        "report": {
+            "pow": true,
+            "powN": true
+        },
+        "metrics": {
+            "x": {
+            "pow": 0.000038391328,
+            "powN": 0.000037209632
+            }
         }
-    },
-    "passing": { "pow": true, "powN": true },
-    "mem": {
-        "pow": {
-            "withLabel": "0.1533 B",
-            "raw": 0.1533 // Bytes
+    }
+    ```
+    </details>
+
+    <details>
+    <summary>in case of errors instead something like this</summary>
+
+    ``` js  
+    {
+        "times": {},
+        "mem": {},
+        "passing": false,
+        "report": {
+            "pow": [
+                {
+                    "passing": true,
+                    "time": 103
+                },
+                {
+                    "passing": false,
+                    "time": 0,
+                    "err": {
+                        "ioIndex": 1,
+                        "received": 64,
+                        "expected": 65
+                    }
+                },
+                {
+                    "passing": true,
+                    "time": 104
+                }
+            ],
+            "powN": [
+                {
+                    "passing": true,
+                    "time": 101
+                },
+                {
+                    "passing": false,
+                    "time": 0,
+                    "err": {
+                        "ioIndex": 1,
+                        "received": 64,
+                        "expected": 65
+                    }
+                },
+                {
+                    "passing": true,
+                    "time": 95
+                }
+            ]
         },
-        "powN": {
-            "withLabel": "0.3801 B",
-            "raw": 0.3801 // Bytes
-        },
-    },
-    "metrics": {}
-}
-```
+        "metrics": {
+            "x": {}
+        }
+    }
+    ```
+    </details>
+
 ## Other options  
 As third parameter we can pass a literal object containing few additional things that might be usefull in some cases: 
 
