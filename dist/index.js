@@ -5,4 +5,186 @@
 / __/ -_|_-</ __/ _ \/ _ \/ -_)
 \__/\__/___/\__/\___/_//_/\__/  v 0.0.22
 */
-var testone=(function(){function formatX(map, base){return function(s, prec=4){if(s==0)return '0 '+base;var n=0, nInt=0;for(var i in map){if(s >=map[i]|| i===base){n=parseFloat((s / map[i]).toFixed(prec), 10);nInt=parseInt(n, 10);n=n==nInt ? nInt:n;return[n, i].join(' ');}}};}function now(){return+new Date();}function isFunction(f){return typeof f==='function';}var formatSize=formatX({GB:2 << 29, MB:2 << 19, KB:2 << 9, B:1}, 'B'), formatTime=formatX({m:60e3, s:1e3, ms:1, µs:1e-3, ns:1e-6}, 'ns');function __testone(ios, imp, options){options=options ||{};var ret={times:{}, passing:{}, mem:{},}, iterations=options.iterations || 1e3, metrics=options.metrics || false, strategies=(imp.constructor.name==='Array')? imp:[imp], globs=[], strategyMem={};if(metrics)ret.metrics={};strategies.forEach(function(strategy){var name=strategy.name, out={pass:0, fail:0}, times=[], memStart=process.memoryUsage().heapUsed, memEnd=0, strategyStart=now(), strategyEnd=0, strategyPassingFlag=false, strategyPassing=false, strategyTime;ios.forEach(function(io, i){var isFuncInput=isFunction(io.in), isFuncOut=isFunction(io.out), j=0, r, output, input, ranOnce=false, ioStart=now(), ioEnd=0;while(j++< iterations){input=isFuncInput ? io.in(i, j):io.in;r=strategy.apply(null, input);output=isFuncOut ? io.out(r, i, j):io.out;if(!ranOnce){strategyPassingFlag=((isFuncOut && output)|| JSON.stringify(r)===JSON.stringify(output));ranOnce=true;}if(!strategyPassingFlag){j=iterations;}}ioEnd=now();times[i]=ioEnd-ioStart;if(strategyPassingFlag){out.pass++;}else{out.fail++;ret.err=ret.err ||{};ret.err[name]=ret.err[name]||[];ret.err[name].push({ioIndex:i, received:isFuncOut ? output:r, expected:isFuncOut ? true:output,});}strategyPassingFlag=false;});strategyEnd=now();strategyTime=strategyEnd-strategyStart;strategyPassing=!!(out.pass && !out.fail);if(strategyPassing){globs.push({name:name, time:strategyTime});}memEnd=process.memoryUsage().heapUsed;strategyMem[name]=Math.abs(memEnd-memStart)/ iterations;ret.passing[name]=strategyPassing;});globs.sort(function(a, b){return a.time-b.time;}).forEach(function(strategy){var name=strategy.name, singleTime=strategy.time / iterations;ret.times[name]={withLabel:formatTime(singleTime), raw:singleTime};ret.mem[name]={withLabel:formatSize(strategyMem[name]), raw:strategyMem[name]};});if(metrics){ret.metrics=Object.entries(metrics).reduce(function(acc,[metricName, metricFunc]){globs.forEach(function(glob){var name=glob.name;acc[metricName]=acc[metricName]||[];acc[metricName].push({[name]:metricFunc({time:ret.times[name].raw, passing:ret.passing[name], mem:ret.mem[name].raw,})});acc[metricName].sort(function(a, b){return Object.values(a)[0]-Object.values(b)[0];})});return acc;},{});ret.metrics=Object.entries(ret.metrics).reduce(function(acc, el){var metric=el[0], values=el[1];acc[metric]=values.reduce(function(accI, el){var k=Object.keys(el)[0], v=Object.values(el)[0];accI[k]=v;return accI;},{});return acc;},{});}return ret;};__testone.formatSize=formatSize;__testone.formatTime=formatTime;return __testone;})();if(typeof exports==='object' && typeof module !=='undefined'){module.exports=testone;}
+var testone = (function (){
+    var DEFAULT_ITERATIONS = 1e3;
+
+    function formatX(map, base) {
+        return function (s, prec = 4) {
+            if (s == 0) return '0 ' + base;
+            var n = 0, nInt = 0;
+            for (var i in map) {
+                if (s >= map[i] || i === base) {
+                    n = parseFloat((s / map[i]).toFixed(prec), 10);
+                    nInt = parseInt(n, 10);
+                    n = n == nInt ? nInt : n;
+                    return [n, i].join(' ');
+                }
+            }
+        };
+    }
+    function now() {return +new Date();}
+    function isFunction(f){return typeof f === 'function';}
+    var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
+        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
+
+    
+
+    function Testone(benchs, strategies, options) {
+        this.benchs = benchs;
+        this.strategies = (strategies.constructor.name === 'Array') ? strategies : [strategies];
+        this.options = options || {};
+        this.iterations = this.options.iterations || DEFAULT_ITERATIONS;
+        this.metrics = this.options.metrics || false;
+        this.ret = {
+            times:{},
+            mem:{},
+            outcome :{},
+        };
+        this.globs = [];
+        this.strategyMem = {};
+        if (this.options.metrics) {
+            this.ret.metrics = {};
+        }
+    }
+    
+    Testone.prototype.run = function(){ return this.runStrategies().checkMetrics().ret; };
+
+    Testone.prototype.runStrategies = function(){
+        var self = this;
+        this.strategies.forEach(function (strategy, i){
+            self.runStrategy.call(self, strategy, i);
+        });
+        return this;
+    };
+
+    Testone.prototype.runStrategy = function(strategy){
+        var self = this,
+            name = strategy.name,
+            memStart = process.memoryUsage().heapUsed,
+            memEnd = 0,
+            startTime = now(),
+            endTime = 0,
+            passing = false,
+            strategyTime,
+            strategyTimeSingle;
+        var res = this.benchs.map(function (bench, j){
+            return self.runBench.call(self, bench, j, strategy)
+        });
+
+        endTime = now();
+        strategyTime = endTime - startTime;
+
+      	strategyTimeSingle = strategyTime / self.iterations
+        
+        passing = res.every(function (r) {return r.passing;});
+
+        if (passing) {
+            self.ret.times[name] = {
+            	raw: {
+                  single: strategyTimeSingle,
+                  total: strategyTime,
+                },
+              	withLabel: {
+              	 single: formatTime(strategyTimeSingle),
+              	 total: formatTime(strategyTime),
+        		}
+            };
+            
+            memEnd = process.memoryUsage().heapUsed;
+            var m = parseFloat(memEnd - memStart, 10),
+                ms = m / self.iterations;
+            self.ret.mem[name] = {
+                raw: {
+                    single: ms,
+                    total: m
+                },
+                withLabel: {
+                    single: formatSize(ms),
+                    total: formatSize(m)
+                },
+            };
+        }
+        this.ret.outcome[name] = passing || res;
+    };
+
+    Testone.prototype.runBench = function(io, i, strategy) {
+        var ret = {
+                passing: false,
+                details: {},
+                time: 0
+            },
+            isFuncInput = isFunction(io.in),
+            isFuncOut = isFunction(io.out),
+            j = 0, r, output, input,
+            ranOnce = false,
+
+        //================================
+            ioStart = now(),
+            ioEnd = 0;
+
+        while (j++ < this.iterations) {
+            input = isFuncInput ? io.in(i, j) : io.in;
+            r = strategy.apply(null, input);
+            output = isFuncOut ? io.out(r, i, j) : io.out;
+            if (!ranOnce) {
+                ret.passing = ((isFuncOut && output ) || JSON.stringify(r) === JSON.stringify(output));
+                ranOnce = true;
+            }
+            // when failing prevent further iterations
+            if (!ret.passing) {
+                j = this.iterations;
+            }
+        }
+        ioEnd = now();
+        ret.time = ioEnd - ioStart;
+        //================================
+
+        if (!ret.passing) {
+            ret.details.err = {
+                ioIndex: i,
+                received: isFuncOut ? output : r,
+                expected: isFuncOut ? true : output,
+            };
+        }
+        return ret;
+    };
+    
+    Testone.prototype.checkMetrics = function(){
+        var self = this,
+            strategiesNames = Object.keys(this.ret.times);
+        if (this.metrics) {
+            this.ret.metrics = Object.entries(this.metrics).reduce(function (acc, [metricName, metricFunc]) {
+                acc[metricName] = strategiesNames.reduce(function(iacc, strategyName){
+                    var param = {
+                        mem: self.ret.mem[strategyName].raw,
+                        time: self.ret.times[strategyName].raw,
+                    }
+                    iacc.push({
+                        name: strategyName,
+                        value: metricFunc(param) 
+                    })
+                    return iacc
+                }, []).sort(function(a, b) {return a.value - b.value})
+                return acc
+            }, {});
+        }
+        return this;
+    };
+
+    function tx(b, s, o) {
+        var t = new Testone(b, s, o);
+        return t.run();
+    };
+
+    tx.formatSize = formatSize;
+    tx.formatTime = formatTime;
+    return tx;
+})();
+
+/* istanbul ignore next */
+if (typeof exports === 'object' &&
+    typeof module !== 'undefined') {
+    module.exports = testone;
+}
+
+
