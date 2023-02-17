@@ -3,22 +3,32 @@
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
-```
-var outcome = testone(
-    *ios <[literal object]>,
-    *strategies <ƒn OR [ƒn]>,
-    options <literal object>
-);
+``` js  
+const factorial1 = n => {if (n === 1) return 1; else return n * factorial1(n - 1)};
+const factorial2 = n => {let r = n; while (n > 1) r *= --n; return r};
+const factorialSum1 = (...a) => a.reduce((acc, e) => acc + factorial1(e), 0);
+const factorialSum2 = (...a) => a.reduce((acc, e) => acc + factorial2(e), 0);
+testone([{
+        in: [4, 5],
+        out: 144
+    }, {
+        in: [6, 7],
+        out: () => 2*3*4*5*6 + 2*3*4*5*6*7
+    }, {
+        in: ({iteration}) => [iteration+1],
+        out: ({iteration}) => {let r = 1, i = iteration + 1; while(i > 0)r *= i--; return r;}
+    }],
+    [factorial1, factorial2]
+)
 ```
 where:
-- `ios` must be an array of object literal keyed as follows:  
+- 1-st parameter must be an array of object literal keyed as follows:  
     - **`in`** keyed element which can be either
         - array for the function inputs 
-        - a function supposed to return an array to be used as input values
+        - a function supposed to return an array to be used as input values (invoked passing `{benchIndex, iteration}`)
     - **`out`** keyed element which can be either
         - a static value  
-        - a function that will receive what is returned from the strategy (plus io index and iteration)  
-        and it's supposed to return a _boolean_ representing the test outcome
+        - a function invoked passing `{received, benchIndex, iteration}` supposed to return a _boolean_ representing the test outcome
     - _`matcher`_ (optional)  
         by default _testone_ compares the expected output with the result using the exact match between the stringyfication of the two as:  
         ``` js
@@ -37,52 +47,52 @@ where:
 - some relevant numberical performance informations
 
     <details>
-    <summary>an out come will look like this</summary>
+    <summary>when everything runs smooth the outcome will look like this</summary>
 
     ``` js  
     {
         "times": {
             "pow": {
-            "raw": {
-                "single": 0.000313,
-                "total": 313
-            },
-            "withLabel": {
-                "single": "313 ns",
-                "total": "313 ms"
-            }
+                "raw": {
+                    "single": 0.000313,
+                    "total": 313
+                },
+                "withLabel": {
+                    "single": "313 ns",
+                    "total": "313 ms"
+                }
             },
             "powN": {
-            "raw": {
-                "single": 0.000316,
-                "total": 316
-            },
-            "withLabel": {
-                "single": "316 ns",
-                "total": "316 ms"
-            }
+                "raw": {
+                    "single": 0.000316,
+                    "total": 316
+                },
+                "withLabel": {
+                    "single": "316 ns",
+                    "total": "316 ms"
+                }
             }
         },
         "mem": {
             "pow": {
-            "raw": {
-                "single": 0.122656,
-                "total": 122656
-            },
-            "withLabel": {
-                "single": "0.1227 B",
-                "total": "119.7813 KB"
-            }
+                "raw": {
+                    "single": 0.122656,
+                    "total": 122656
+                },
+                "withLabel": {
+                    "single": "0.1227 B",
+                    "total": "119.7813 KB"
+                }
             },
             "powN": {
-            "raw": {
-                "single": 0.117752,
-                "total": 117752
-            },
-            "withLabel": {
-                "single": "0.1178 B",
-                "total": "114.9922 KB"
-            }
+                "raw": {
+                    "single": 0.117752,
+                    "total": 117752
+                },
+                "withLabel": {
+                    "single": "0.1178 B",
+                    "total": "114.9922 KB"
+                }
             }
         },
         "passing": true,
@@ -92,8 +102,8 @@ where:
         },
         "metrics": {
             "x": {
-            "pow": 0.000038391328,
-            "powN": 0.000037209632
+                "pow": 0.000038391328,
+                "powN": 0.000037209632
             }
         }
     }
@@ -159,7 +169,7 @@ where:
 As third parameter we can pass a literal object containing few additional things that might be usefull in some cases: 
 
 ### _**matcher**_  
-This works exactly as in the case of the single benchmark but the matcher will be used globally, sill the single case matcher can be overridden.
+This works exactly as in the case of the single benchmark but the matcher will be used globally, still the single case matcher can be overridden.
 ### _**iterations**_  
 To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times; clearly enough this could not fit some cases (exactly as above). 
 For this reason is possible to specify in the third `options` literal object an **integer** parameter keyed `iterations`
