@@ -1,4 +1,6 @@
 var testone = (function (){
+    var DEFAULT_ITERATIONS = 1e3;
+
     function formatX(map, base) {
         return function (s, prec = 4) {
             if (s == 0) return '0 ' + base;
@@ -15,49 +17,31 @@ var testone = (function (){
     }
     function now() {return +new Date();}
     function isFunction(f){return typeof f === 'function';}
-
-    var DEFAULT_ITERATIONS = 1e3,
-        formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
+    var formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
         formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
+
+    
 
     function Testone(benchs, strategies, options) {
         this.benchs = benchs;
         this.strategies = (strategies.constructor.name === 'Array') ? strategies : [strategies];
         this.options = options || {};
         this.iterations = this.options.iterations || DEFAULT_ITERATIONS;
-        this.userMetrics = this.options.metrics || false;
-        this.times = {};
-        this.mem = {};
-        this.report = {};
-        this.passing = false;
-        this.metrics = null;
+        this.metrics = this.options.metrics || false;
         this.ret = {
-            times: {},
-            mem: {},
+            times:{},
+            mem:{},
+            outcome :{},
         };
         this.globs = [];
         this.strategyMem = {};
         if (this.options.metrics) {
-            this.metrics = {};
-        }
-        if (isFunction(this.options.matcher)) {
-            Testone.prototype.matcher = this.options.matcher;
+            this.ret.metrics = {};
         }
     }
     
-    Testone.prototype.run = function(){
-        this.runStrategies().checkMetrics();
-        // console.log(this.ret)
-        var r = {
-            times: this.times,
-            mem: this.mem,
-            passing: this.passing,
-            report: this.report,
-            metrics: this.metrics
-        }
-        return r;
-    };
-   
+    Testone.prototype.run = function(){ return this.runStrategies().checkMetrics().ret; };
+
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
@@ -75,21 +59,20 @@ var testone = (function (){
             endTime = 0,
             passing = false,
             strategyTime,
-            strategyTimeSingle,
-            res = this.benchs.map(function (bench, j) {
-                return self.runBench.call(self, bench, j, strategy)
-            }),
-            m, ms;
+            strategyTimeSingle;
+        var res = this.benchs.map(function (bench, j){
+            return self.runBench.call(self, bench, j, strategy)
+        });
 
         endTime = now();
-
         strategyTime = endTime - startTime;
-      	strategyTimeSingle = strategyTime / this.iterations
 
+      	strategyTimeSingle = strategyTime / self.iterations
+        
         passing = res.every(function (r) {return r.passing;});
 
         if (passing) {
-            this.times[name] = {
+            self.ret.times[name] = {
             	raw: {
                   single: strategyTimeSingle,
                   total: strategyTime,
@@ -101,10 +84,9 @@ var testone = (function (){
             };
             
             memEnd = process.memoryUsage().heapUsed;
-            //abs here needed for gc occurrences
-            m = parseFloat(Math.abs(memEnd - memStart), 10);
-            ms = m / this.iterations;
-            this.mem[name] = {
+            var m = parseFloat(memEnd - memStart, 10),
+                ms = m / self.iterations;
+            self.ret.mem[name] = {
                 raw: {
                     single: ms,
                     total: m
@@ -115,32 +97,30 @@ var testone = (function (){
                 },
             };
         }
-        this.report[name] = passing || res;
-        this.passing = passing;
+        this.ret.outcome[name] = passing || res;
     };
 
-    Testone.prototype.matcher = function(a) { return JSON.stringify(a.received) === JSON.stringify(a.expected)};
     Testone.prototype.runBench = function(io, i, strategy) {
         var ret = {
                 passing: false,
+                details: {},
                 time: 0
             },
             isFuncInput = isFunction(io.in),
             isFuncOut = isFunction(io.out),
-            j = 0, received, output, input,
+            j = 0, r, output, input,
             ranOnce = false,
 
         //================================
             ioStart = now(),
-            ioEnd = 0,
-            matcher = isFunction(io.matcher) ? io.matcher : this.matcher;
+            ioEnd = 0;
 
         while (j++ < this.iterations) {
-            input = isFuncInput ? io.in({benchIndex: i, iteration: j}) : io.in;
-            received = strategy.apply(null, input);
-            output = isFuncOut ? io.out({received: received, benchIndex: i, iteration: j}) : io.out;
+            input = isFuncInput ? io.in(i, j) : io.in;
+            r = strategy.apply(null, input);
+            output = isFuncOut ? io.out(r, i, j) : io.out;
             if (!ranOnce) {
-                ret.passing = matcher({received: received, expected: output});
+                ret.passing = ((isFuncOut && output ) || JSON.stringify(r) === JSON.stringify(output));
                 ranOnce = true;
             }
             // when failing prevent further iterations
@@ -153,9 +133,9 @@ var testone = (function (){
         //================================
 
         if (!ret.passing) {
-            ret.err = {
+            ret.details.err = {
                 ioIndex: i,
-                received: isFuncOut ? output : received,
+                received: isFuncOut ? output : r,
                 expected: isFuncOut ? true : output,
             };
         }
@@ -164,20 +144,22 @@ var testone = (function (){
     
     Testone.prototype.checkMetrics = function(){
         var self = this,
-            strategiesNames = Object.keys(this.times);
-        if (this.userMetrics) {
-            this.metrics = Object.entries(this.userMetrics)
-                .reduce(function (acc, [metricName, metricFunc]) {
-                    acc[metricName] = strategiesNames.reduce(function(iacc, strategyName){
-                        var param = {
-                            mem: self.mem[strategyName].raw,
-                            time: self.times[strategyName].raw,
-                        }
-                        iacc[strategyName] = metricFunc(param);
-                        return iacc
-                    }, {})
-                    return acc
-                }, {});
+            strategiesNames = Object.keys(this.ret.times);
+        if (this.metrics) {
+            this.ret.metrics = Object.entries(this.metrics).reduce(function (acc, [metricName, metricFunc]) {
+                acc[metricName] = strategiesNames.reduce(function(iacc, strategyName){
+                    var param = {
+                        mem: self.ret.mem[strategyName].raw,
+                        time: self.ret.times[strategyName].raw,
+                    }
+                    iacc.push({
+                        name: strategyName,
+                        value: metricFunc(param) 
+                    })
+                    return iacc
+                }, []).sort(function(a, b) {return a.value - b.value})
+                return acc
+            }, {});
         }
         return this;
     };
@@ -197,3 +179,5 @@ if (typeof exports === 'object' &&
     typeof module !== 'undefined') {
     module.exports = testone;
 }
+
+
