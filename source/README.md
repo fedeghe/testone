@@ -22,7 +22,7 @@ testone([{
 )
 ```
 where:
-- 1-st parameter must be an array of object literal keyed as follows:  
+- **1<sup>st</sup> parameter** (mandatory): an array of object literal keyed as follows:  
     - **`in`** keyed element which can be either
         - array for the function inputs 
         - a function supposed to return an array to be used as input values (invoked passing `{benchIndex, iteration}`)
@@ -39,12 +39,21 @@ where:
         matcher: ({expected, received}) => received < expected 
         ```  
 
-- `strat` the function or the array of functions one wants to test & check
+- **2<sup>nd</sup> parameter** (mandatory): the function or the array of functions one wants to test & check
+- _3<sup>rd</sup> parameter_:  
+    ```
+    {
+        iterations: <Integer>,
+        matcher: <function>,
+        metrics: <object literal containing functions>
+    }  
+    ```
+    more info below about the 3<sup>rd</sup> optional parameter
 
 
 ### What do it get in the `outcome`?  
 - check of the correctness
-- some relevant numberical performance informations
+- some relevant numerical performance informations
 
     <details>
     <summary>when everything runs smooth the outcome will look like this</summary>
