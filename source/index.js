@@ -1,4 +1,8 @@
 var testone = (function (){
+    var DEFAULT_ITERATIONS = 1e3,
+        formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
+        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
+
     function formatX(map, base) {
         return function (s, prec = 4) {
             if (s == 0) return '0 ' + base;
@@ -14,12 +18,8 @@ var testone = (function (){
         };
     }
     function now() {return +new Date();}
+
     function isFunction(f){return typeof f === 'function';}
-
-    var DEFAULT_ITERATIONS = 1e3,
-        formatSize = formatX({ GB: 2 << 29, MB: 2 << 19, KB: 2 << 9, B: 1 }, 'B'),
-        formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns');
-
     function Testone(benchs, strategies, options) {
         this.benchs = benchs;
         this.strategies = (strategies.constructor.name === 'Array') ? strategies : [strategies];
@@ -29,12 +29,9 @@ var testone = (function (){
         this.times = {};
         this.mem = {};
         this.report = {};
+        this.pluginsResults = {};
         this.passing = false;
         this.metrics = null;
-        this.ret = {
-            times: {},
-            mem: {},
-        };
         this.globs = [];
         this.strategyMem = {};
         if (this.options.metrics) {
@@ -46,18 +43,33 @@ var testone = (function (){
     }
     
     Testone.prototype.run = function(){
-        this.runStrategies().checkMetrics();
-        // console.log(this.ret)
+        this.runStrategies().runPlugins().checkMetrics();
         var r = {
             times: this.times,
             mem: this.mem,
             passing: this.passing,
             report: this.report,
-            metrics: this.metrics
+            metrics: this.metrics,
+            plugins: this.pluginsResults
         }
         return r;
     };
-   
+
+    Testone.prototype.runPlugins = function(){
+        var plugins = this.options.plugins
+        if (plugins) {
+            this.pluginsResults = this.strategies.reduce(function(acc, strategy){
+                var code = strategy.toString();
+                acc[strategy.name] = plugins.reduce(function(iAcc, plugin){
+                    var name = plugin.fn.name;
+                    iAcc[name] = plugin.fn({source: code, options: plugin.options});
+                    return iAcc;
+                }, {});
+                return acc;
+            }, {});
+        }
+        return this;
+    };
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
@@ -84,20 +96,20 @@ var testone = (function (){
         endTime = now();
 
         strategyTime = endTime - startTime;
-      	strategyTimeSingle = strategyTime / this.iterations
+        strategyTimeSingle = strategyTime / this.iterations
 
         passing = res.every(function (r) {return r.passing;});
 
         if (passing) {
             this.times[name] = {
-            	raw: {
-                  single: strategyTimeSingle,
-                  total: strategyTime,
+                raw: {
+                single: strategyTimeSingle,
+                total: strategyTime,
                 },
-              	withLabel: {
-              	 single: formatTime(strategyTimeSingle),
-              	 total: formatTime(strategyTime),
-        		}
+                withLabel: {
+                single: formatTime(strategyTimeSingle),
+                total: formatTime(strategyTime),
+                }
             };
             
             memEnd = process.memoryUsage().heapUsed;
@@ -172,6 +184,7 @@ var testone = (function (){
                         var param = {
                             mem: self.mem[strategyName].raw,
                             time: self.times[strategyName].raw,
+                            plugins: self.pluginsResults[strategyName]
                         }
                         iacc[strategyName] = metricFunc(param);
                         return iacc

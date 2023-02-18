@@ -4,3 +4,4 @@ coverage
 .printVersion
 .coveralls.yml
 check.js
+plugins

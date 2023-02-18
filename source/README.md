@@ -206,6 +206,45 @@ and now in the returned metrics object we'll find for each metric something like
 } 
 ```
 
+### _**plugins**_  
+One can write a plugin in **5 minutes** (when relying on some library for the heavy lifting) to do much more, a simple example can clarify how easy and powerful it is.
+
+
+> EXAMPLE  
+> 
+> Suppose we want to evaluate also the _cyclomatic complexity_ and find on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex).  
+> One can easily get the _escomplex_ results directly in the _testone_ output and also consume them in the _metrics_ functions.  
+>  ``` js
+> import complex from './complex'
+> // ...
+> 
+> const res = testone(benchs, fns, {
+>     plugins: [{
+>         fn: complex,
+>         options: {}
+>     }],
+>     metrics: {
+>         cyclocplx: ({plugins: {complex}}) =>
+>           complex.aggregate.cyclomatic
+>                  // this comes out of escomplex
+>    }
+> }
+> ```
+> and all we have to do is to write an adapter `complex`: 
+> ``` js
+> // complex.js
+> export default ({source, options}) => escomplex.analyse(source, options)
+> ```
+> cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options;  
+> this cannot cleary always fit the library we are exploiting since _testone_ always calls the `plugin.fn` passing one literal object containing:  
+> ```
+> {
+>     source: '<the source code of the strategy>',
+>     options: '<the options object passed in the plugin.options>'
+> }
+> ```
+> first parameter the strategy code and as second parameter the `plugin.options`.
+
 ---
 
 🤟 last build on __DATE__  
