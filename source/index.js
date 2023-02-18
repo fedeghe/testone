@@ -51,12 +51,12 @@ var testone = (function (){
             report: this.report,
             metrics: this.metrics,
             plugins: this.pluginsResults
-        }
+        };
         return r;
     };
 
     Testone.prototype.runPlugins = function(){
-        var plugins = this.options.plugins
+        var plugins = this.options.plugins;
         if (plugins) {
             this.pluginsResults = this.strategies.reduce(function(acc, strategy){
                 var code = strategy.toString();
@@ -96,7 +96,7 @@ var testone = (function (){
         endTime = now();
 
         strategyTime = endTime - startTime;
-        strategyTimeSingle = strategyTime / this.iterations
+        strategyTimeSingle = strategyTime / this.iterations;
 
         passing = res.every(function (r) {return r.passing;});
 
@@ -185,11 +185,11 @@ var testone = (function (){
                             mem: self.mem[strategyName].raw,
                             time: self.times[strategyName].raw,
                             plugins: self.pluginsResults[strategyName]
-                        }
+                        };
                         iacc[strategyName] = metricFunc(param);
-                        return iacc
-                    }, {})
-                    return acc
+                        return iacc;
+                    }, {});
+                    return acc;
                 }, {});
         }
         return this;
