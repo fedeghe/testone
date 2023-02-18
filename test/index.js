@@ -1,5 +1,5 @@
 const assert = require('assert'),
-    testone = require('../dist/index.js'),
+    testone = require('../source/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
