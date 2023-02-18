@@ -4,21 +4,35 @@
 Quickly test performance and correctness of one or more functions against input/output data.  
 
 ``` js  
-const factorial1 = n => {if (n === 1) return 1; else return n * factorial1(n - 1)};
-const factorial2 = n => {let r = n; while (n > 1) r *= --n; return r};
-const factorialSum1 = (...a) => a.reduce((acc, e) => acc + factorial1(e), 0);
-const factorialSum2 = (...a) => a.reduce((acc, e) => acc + factorial2(e), 0);
+const factorialRecursive = n => {
+    if (n === 1) return 1;
+    else return n * factorialRecursive(n - 1);
+}
+const factorialIterative = n => {
+    let r = n;
+    while (n > 1) r *= --n;
+    return r
+};
+
+const factorialCache = []
+const factorialMemoized = n => {
+    if (!factorialCache[n]) {
+  	    factorialCache[n] = n <= 1 ? 1 : n * factorialMemoized(n - 1);
+    }
+    return factorialCache[n];
+}
+ 
 testone([{
-        in: [4, 5],
-        out: 144
+        in: [20],
+        out: 2432902008176640000
     }, {
-        in: [6, 7],
-        out: () => 2*3*4*5*6 + 2*3*4*5*6*7
+        in: [21],
+        out: () => 2*3*4*5*6*7*8*9*10*11*12*13*14*15*16*17*18*19*20*21
     }, {
         in: ({iteration}) => [iteration+1],
         out: ({iteration}) => {let r = 1, i = iteration + 1; while(i > 0)r *= i--; return r;}
     }],
-    [factorial1, factorial2]
+    [factorialRecursive, factorialIterative, factorialMemoized]
 )
 ```
 where:
@@ -62,66 +76,83 @@ where:
     ``` js  
     {
         "times": {
-            "pow": {
+            "factorialRecursive": {
                 "raw": {
-                    "single": 0.000313,
-                    "total": 313
+                    "single": 0.01,
+                    "total": 10
                 },
                 "withLabel": {
-                    "single": "313 ns",
-                    "total": "313 ms"
+                    "single": "10 µs",
+                    "total": "10 ms"
                 }
             },
-            "powN": {
+            "factorialIterative": {
                 "raw": {
-                    "single": 0.000316,
-                    "total": 316
+                    "single": 0.003,
+                    "total": 3
                 },
                 "withLabel": {
-                    "single": "316 ns",
-                    "total": "316 ms"
+                    "single": "3 µs",
+                    "total": "3 ms"
+                }
+            },
+            "factorialMemoized": {
+                "raw": {
+                    "single": 0.003,
+                    "total": 3
+                },
+                "withLabel": {
+                    "single": "3 µs",
+                    "total": "3 ms"
                 }
             }
         },
         "mem": {
-            "pow": {
+            "factorialRecursive": {
                 "raw": {
-                    "single": 0.122656,
-                    "total": 122656
+                    "single": 1487.856,
+                    "total": 1487856
                 },
                 "withLabel": {
-                    "single": "0.1227 B",
-                    "total": "119.7813 KB"
+                    "single": "1.453 KB",
+                    "total": "1.4189 MB"
                 }
             },
-            "powN": {
+            "factorialIterative": {
                 "raw": {
-                    "single": 0.117752,
-                    "total": 117752
+                    "single": 1387.976,
+                    "total": 1387976
                 },
                 "withLabel": {
-                    "single": "0.1178 B",
-                    "total": "114.9922 KB"
+                    "single": "1.3554 KB",
+                    "total": "1.3237 MB"
+                }
+            },
+            "factorialMemoized": {
+                "raw": {
+                    "single": 464.16,
+                    "total": 464160
+                },
+                "withLabel": {
+                    "single": "464.16 B",
+                    "total": "453.2813 KB"
                 }
             }
         },
         "passing": true,
         "report": {
-            "pow": true,
-            "powN": true
+            "factorialRecursive": true,
+            "factorialIterative": true,
+            "factorialMemoized": true
         },
-        "metrics": {
-            "x": {
-                "pow": 0.000038391328,
-                "powN": 0.000037209632
-            }
-        }
+        "metrics": null,
+        "plugins": {}
     }
     ```
     </details>
 
     <details>
-    <summary>in case of errors instead</summary>
+    <summary>in case of errors instead, for example if the expected output for the second benchmark is doubled</summary>
 
     ``` js  
     {
@@ -129,48 +160,66 @@ where:
         "mem": {},
         "passing": false,
         "report": {
-            "pow": [
+            "factorialRecursive": [
                 {
                     "passing": true,
-                    "time": 103
+                    "time": 1
                 },
                 {
                     "passing": false,
                     "time": 0,
                     "err": {
                         "ioIndex": 1,
-                        "received": 64,
-                        "expected": 65
+                        "received": 51090942171709440000,
+                        "expected": 102181884343418880000
                     }
                 },
                 {
                     "passing": true,
-                    "time": 104
+                    "time": 11
                 }
             ],
-            "powN": [
+            "factorialIterative": [
                 {
                     "passing": true,
-                    "time": 101
+                    "time": 1
                 },
                 {
                     "passing": false,
                     "time": 0,
                     "err": {
                         "ioIndex": 1,
-                        "received": 64,
-                        "expected": 65
+                        "received": 51090942171709440000,
+                        "expected": 102181884343418880000
                     }
                 },
                 {
                     "passing": true,
-                    "time": 95
+                    "time": 2
+                }
+            ],
+            "factorialMemoized": [
+                {
+                    "passing": true,
+                    "time": 0
+                },
+                {
+                    "passing": false,
+                    "time": 0,
+                    "err": {
+                        "ioIndex": 1,
+                        "received": 51090942171709440000,
+                        "expected": 102181884343418880000
+                    }
+                },
+                {
+                    "passing": true,
+                    "time": 1
                 }
             ]
         },
-        "metrics": {
-            "x": {}
-        }
+        "metrics": null,
+        "plugins": {}
     }
     ```
     </details>
@@ -218,7 +267,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 5 minutes).  
 > 
 > We can easily get 
-> - the _escomplex_ results directly in the _testone_ output
+> - the _escomplex_ results for each strategy directly in the _testone_ output
 > - consume the results also in the _metrics_ functions.  
 >  ``` js
 > import complex from './complex'
@@ -227,13 +276,20 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > const res = testone(benchs, fns, {
 >     plugins: [{
 >         fn: complex,
->         options: {/* here the options you want to be passed in the adapter*/}
+>         options: {/*
+>           here the options you want to
+>           be passed to the adapter */
+>         }
 >     }],
 >     metrics: {
 >         cyclocplx: ({plugins: {complex}}) =>
->           complex.aggregate.cyclomatic /*
+>           complex.aggregate.cyclomatic, /*
 >                 |
 >                 `-> this comes out of escomplex.analyse */
+>         fx: ({
+>           mem: {single: mem},
+>           time: {single: time}
+>         }) => time * mem            
 >    }
 > }
 > ```

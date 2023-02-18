@@ -57,7 +57,7 @@ var testone = (function (){
 
     Testone.prototype.runPlugins = function(){
         var plugins = this.options.plugins;
-        if (plugins) {
+        if (this.passing && plugins) {
             this.pluginsResults = this.strategies.reduce(function(acc, strategy){
                 var code = strategy.toString();
                 acc[strategy.name] = plugins.reduce(function(iAcc, plugin){
@@ -139,7 +139,7 @@ var testone = (function (){
             },
             isFuncInput = isFunction(io.in),
             isFuncOut = isFunction(io.out),
-            j = 0, received, output, input,
+            j = 0, received, expected, input,
             ranOnce = false,
 
         //================================
@@ -150,9 +150,9 @@ var testone = (function (){
         while (j++ < this.iterations) {
             input = isFuncInput ? io.in({benchIndex: i, iteration: j}) : io.in;
             received = strategy.apply(null, input);
-            output = isFuncOut ? io.out({received: received, benchIndex: i, iteration: j}) : io.out;
+            expected = isFuncOut ? io.out({received: received, benchIndex: i, iteration: j}) : io.out;
             if (!ranOnce) {
-                ret.passing = matcher({received: received, expected: output});
+                ret.passing = matcher({received: received, expected: expected});
                 ranOnce = true;
             }
             // when failing prevent further iterations
@@ -167,8 +167,8 @@ var testone = (function (){
         if (!ret.passing) {
             ret.err = {
                 ioIndex: i,
-                received: isFuncOut ? output : received,
-                expected: isFuncOut ? true : output,
+                received: received,
+                expected: expected,
             };
         }
         return ret;
@@ -177,7 +177,7 @@ var testone = (function (){
     Testone.prototype.checkMetrics = function(){
         var self = this,
             strategiesNames = Object.keys(this.times);
-        if (this.userMetrics) {
+        if (this.passing && this.userMetrics) {
             this.metrics = Object.entries(this.userMetrics)
                 .reduce(function (acc, [metricName, metricFunc]) {
                     acc[metricName] = strategiesNames.reduce(function(iacc, strategyName){
