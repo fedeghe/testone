@@ -4,6 +4,7 @@
 /node_modules
 /test
 /source
+/plugins
 /.nyc_output
 .eslintrc
 .eslintignore
