@@ -194,7 +194,7 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     {
         time: { single, total },
         mem: { single, total },
-        plugins: {/* see next section*/}
+        plugins: {// see next section }
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem

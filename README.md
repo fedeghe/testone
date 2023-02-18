@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.0.26)
+## testone (v. 0.0.27)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -194,7 +194,7 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     {
         time: { single, total },
         mem: { single, total },
-        plugins: {/* see next section*/}
+        plugins: {// see next section }
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
