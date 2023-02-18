@@ -45,10 +45,11 @@ where:
     {
         iterations: <Integer>,
         matcher: <function>,
-        metrics: <object literal containing functions>
+        metrics: <object literal containing keyed functions>,
+        plugins: <Array[{fn: <function>, options: <object literal>}]>
     }  
     ```
-    more info below about the 3<sup>rd</sup> optional parameter
+    more info below about the 3<sup>rd</sup> and 4<sup>th</sup> optional parameters.
 
 
 ### What do it get in the `outcome`?  
@@ -56,7 +57,7 @@ where:
 - some relevant numerical performance informations
 
     <details>
-    <summary>when everything runs smooth the outcome will look like this</summary>
+    <summary>click to see how the output will look alike when everything runs smoothly</summary>
 
     ``` js  
     {
@@ -120,7 +121,7 @@ where:
     </details>
 
     <details>
-    <summary>in case of errors instead something like this</summary>
+    <summary>in case of errors instead</summary>
 
     ``` js  
     {
@@ -180,7 +181,7 @@ As third parameter we can pass a literal object containing few additional things
 ### _**matcher**_  
 This works exactly as in the case of the single benchmark but the matcher will be used globally, still the single case matcher can be overridden.
 ### _**iterations**_  
-To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times; clearly enough this could not fit some cases (exactly as above). 
+To get a more accurate times & memory measurerements by default _testone_ runs each function 1k times; clearly enough this could not fit every cases (exactly as above). 
 For this reason is possible to specify in the third `options` literal object an **integer** parameter keyed `iterations`
 
 ### _**metrics**_  
@@ -192,7 +193,8 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     /* will be invoked passing 
     {
         time: { single, total },
-        mem: { single, total }
+        mem: { single, total },
+        plugins: {/* see next section*/}
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
@@ -207,13 +209,17 @@ and now in the returned metrics object we'll find for each metric something like
 ```
 
 ### _**plugins**_  
-One can write a plugin in **5 minutes** (when relying on some library for the heavy lifting) to do much more, a simple example can clarify how easy and powerful it is.
+One can write a plugin in **2 minutes** (when relying on some library for the heavy lifting) to do much more. A trivial example can clarify better than any _tl;dr_.
 
 
-> EXAMPLE  
+> ## Plugin usage example  
 > 
-> Suppose we want to evaluate also the _cyclomatic complexity_ and find on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex).  
-> One can easily get the _escomplex_ results directly in the _testone_ output and also consume them in the _metrics_ functions.  
+> Suppose we want to evaluate also the _cyclomatic complexity_ and find  
+> on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 5 minutes).  
+> 
+> We can easily get 
+> - the _escomplex_ results directly in the _testone_ output
+> - consume the results also in the _metrics_ functions.  
 >  ``` js
 > import complex from './complex'
 > // ...
@@ -221,22 +227,24 @@ One can write a plugin in **5 minutes** (when relying on some library for the he
 > const res = testone(benchs, fns, {
 >     plugins: [{
 >         fn: complex,
->         options: {}
+>         options: {/* here the options you want to be passed in the adapter*/}
 >     }],
 >     metrics: {
 >         cyclocplx: ({plugins: {complex}}) =>
->           complex.aggregate.cyclomatic
->                  // this comes out of escomplex
+>           complex.aggregate.cyclomatic /*
+>                 |
+>                 `-> this comes out of escomplex.analyse */
 >    }
 > }
 > ```
-> and all we have to do is to write an adapter `complex`: 
+> and all we have to do is to write an adapter for that `complex` plugin:    
 > ``` js
-> // complex.js
+> // complex.js 🤣
 > export default ({source, options}) => escomplex.analyse(source, options)
-> ```
-> cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options;  
-> this cannot cleary always fit the library we are exploiting since _testone_ always calls the `plugin.fn` passing one literal object containing:  
+> ```  
+>
+> Cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options;  
+> this cannot cleary always fit the lib we are exploiting since _testone_ will always calls the `plugin.fn` passing one literal object containing:  
 > ```
 > {
 >     source: '<the source code of the strategy>',
