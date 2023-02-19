@@ -4,16 +4,20 @@
 Quickly test performance and correctness of one or more functions against input/output data.  
 
 ``` js  
+// factorial implementation one
 const factorialRecursive = n => {
     if (n === 1) return 1;
     else return n * factorialRecursive(n - 1);
 }
+
+// factorial implementation two
 const factorialIterative = n => {
     let r = n;
     while (n > 1) r *= --n;
     return r
 };
 
+// factorial implementation three
 const factorialCache = []
 const factorialMemoized = n => {
     if (!factorialCache[n]) {
@@ -22,7 +26,10 @@ const factorialMemoized = n => {
     return factorialCache[n];
 }
  
-testone([{
+/**
+ * Run the test
+ */
+const result = testone([{
         in: [20],
         out: 2432902008176640000
     }, {
@@ -34,6 +41,10 @@ testone([{
     }],
     [factorialRecursive, factorialIterative, factorialMemoized]
 )
+
+console.log(JSON.stringify(res, null, 2))
+// but we could for example have some jest 
+// test doing some comparison on `result` 
 ```
 where:
 - **1<sup>st</sup> parameter** (mandatory): an array of object literal keyed as follows:  
@@ -42,7 +53,7 @@ where:
         - a function supposed to return an array to be used as input values (invoked passing `{benchIndex, iteration}`)
     - **`out`** keyed element which can be either
         - a static value  
-        - a function invoked passing `{received, benchIndex, iteration}` supposed to return a _boolean_ representing the test outcome
+        - a function invoked passing `{received, benchIndex, iteration}` supposed to return the expected output
     - _`matcher`_ (optional)  
         by default _testone_ compares the expected output with the result using the exact match between the stringyfication of the two as:  
         ``` js
@@ -252,9 +263,10 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
 and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
 ``` json
 "aLabel": {
-    "pow": 0.00012342,
-    "powN": 0.00923412
-} 
+    "factorialRecursive": 11.053367999999999,
+    "factorialIterative": 1.42704,
+    "factorialMemoized": 4.787640000000001
+}
 ```
 
 ### _**plugins**_  
@@ -267,19 +279,23 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 5 minutes).  
 > 
 > We can easily get 
-> - the _escomplex_ results for each strategy directly in the _testone_ output
+> - the _escomplex_ results for each strategy directly in the _testone_ output  
 > - consume the results also in the _metrics_ functions.  
 >  ``` js
-> import complex from './complex'
-> // ...
-> 
+> import escomplex from 'escomplex'
+> const complex = ({source, options}) => escomplex.analyse(source, options)
+> /**
+>  * .
+>  * ...
+>  * .
+>  */
 > const res = testone(benchs, fns, {
 >     plugins: [{
 >         fn: complex,
 >         options: {/*
 >           here the options you want to
 >           be passed to the adapter */
->         }
+>         },
 >     }],
 >     metrics: {
 >         cyclocplx: ({plugins: {complex}}) =>
@@ -292,14 +308,9 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >         }) => time * mem            
 >    }
 > }
-> ```
-> and all we have to do is to write an adapter for that `complex` plugin:    
-> ``` js
-> // complex.js 🤣
-> export default ({source, options}) => escomplex.analyse(source, options)
 > ```  
 >
-> Cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options;  
+> Cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options 3<sup>rd</sup> parameter;  
 > this cannot cleary always fit the lib we are exploiting since _testone_ will always calls the `plugin.fn` passing one literal object containing:  
 > ```
 > {

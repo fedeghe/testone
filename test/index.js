@@ -45,7 +45,7 @@ describe('basic testone', () => {
         assert(res.passing);
     });
 
-    it('should return the expected values , more strategies', () => {
+    it('should return the expected values, more strategies', () => {
         var fns = [fac1, fac2],
             res = testone([{
                 in: [10],

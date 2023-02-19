@@ -103,12 +103,12 @@ var testone = (function (){
         if (passing) {
             this.times[name] = {
                 raw: {
-                single: strategyTimeSingle,
-                total: strategyTime,
+                    single: strategyTimeSingle,
+                    total: strategyTime,
                 },
                 withLabel: {
-                single: formatTime(strategyTimeSingle),
-                total: formatTime(strategyTime),
+                    single: formatTime(strategyTimeSingle),
+                    total: formatTime(strategyTime),
                 }
             };
             
