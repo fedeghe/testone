@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.1.0)
+## testone (v. 0.1.1)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -263,9 +263,10 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
 and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
 ``` json
 "aLabel": {
-    "pow": 0.00012342,
-    "powN": 0.00923412
-} 
+    "factorialRecursive": 11.053367999999999,
+    "factorialIterative": 1.42704,
+    "factorialMemoized": 4.787640000000001
+}
 ```
 
 ### _**plugins**_  
@@ -278,8 +279,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 5 minutes).  
 > 
 > We can easily get 
-> - the _escomplex_ results for each strategy directly in the _testone_ output;  
->   this can be skipped specifing `onlyInMetrics:true` in the plugin setting obj
+> - the _escomplex_ results for each strategy directly in the _testone_ output  
 > - consume the results also in the _metrics_ functions.  
 >  ``` js
 > import escomplex from 'escomplex'
@@ -296,10 +296,6 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >           here the options you want to
 >           be passed to the adapter */
 >         },
->         onlyInMetrics: false  // this is the default,
->                               // if true, the plugin result will
->                               // not be found the response
->                               // but still available in metrics ƒns
 >     }],
 >     metrics: {
 >         cyclocplx: ({plugins: {complex}}) =>
