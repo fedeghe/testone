@@ -63,6 +63,7 @@ var testone = (function (){
                 acc[strategy.name] = plugins.reduce(function(iAcc, plugin){
                     var name = plugin.fn.name;
                     iAcc[name] = plugin.fn({source: code, options: plugin.options});
+                    console.log(iAcc)
                     return iAcc;
                 }, {});
                 return acc;
