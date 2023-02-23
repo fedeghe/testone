@@ -17,6 +17,9 @@ var testone = (function (){
             }
         };
     }
+    function getCode(fn){
+        return `const ${fn.name} = ${fn}`
+    }
     function now() {return +new Date();}
 
     function isFunction(f){return typeof f === 'function';}
@@ -59,7 +62,7 @@ var testone = (function (){
         var plugins = this.options.plugins;
         if (this.passing && plugins) {
             this.pluginsResults = this.strategies.reduce(function(acc, strategy){
-                var code = strategy.toString();
+                var code = getCode(strategy);
                 acc[strategy.name] = plugins.reduce(function(iAcc, plugin){
                     var name = plugin.fn.name;
                     iAcc[name] = plugin.fn({source: code, options: plugin.options});
