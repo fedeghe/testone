@@ -28,10 +28,6 @@
         "nyc": "^15.1.0"
     },
     "dependencies": {
-        "@babel/core": "^7.21.0",
-        "acorn": "^8.8.2",
-        "escomplex": "^2.0.0-alpha",
-        "escomplex-ast-moz": "^0.2.1",
-        "esprima": "^2.7.2"
+        "complexity-report": "^2.0.0-alpha"
     }
 }

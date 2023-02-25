@@ -46,40 +46,51 @@ var testone = (function (){
     }
     
     Testone.prototype.run = function(){
-        this.runStrategies().runPlugins().checkMetrics();
+        this.runStrategies();
+        this.runPlugins();
+        this.checkMetrics();
         var r = {
             times: this.times,
             mem: this.mem,
             passing: this.passing,
             report: this.report,
             metrics: this.metrics,
-            plugins: this.pluginsResults
+            pluginsReport: this.pluginsReport
         };
         return r;
     };
 
     Testone.prototype.runPlugins = function(){
-        var plugins = this.options.plugins;
+        var plugins = this.options.plugins,
+            self = this;
+        this.pluginsReport = null;
         if (this.passing && plugins) {
             this.pluginsResults = this.strategies.reduce(function(acc, strategy){
-                var code = getCode(strategy);
-                acc[strategy.name] = plugins.reduce(function(iAcc, plugin){
+                var code = getCode(strategy),
+                    strategyName = strategy.name;
+                acc[strategyName] = plugins.reduce(function(iAcc, plugin){
                     var name = plugin.fn.name;
-                    iAcc[name] = plugin.fn({source: code, options: plugin.options});
-                    console.log(iAcc)
+                    iAcc[name] = plugin.fn({
+                        source: code,
+                        name: strategyName,
+                        options: plugin.options
+                    });
+                    if (!plugin.skipReport) {
+                        self.pluginsReport = self.pluginsReport || {}
+                        self.pluginsReport[strategyName] = self.pluginsReport[strategyName] || {}
+                        self.pluginsReport[strategyName][name] = iAcc[name]
+                    }
                     return iAcc;
                 }, {});
                 return acc;
             }, {});
         }
-        return this;
     };
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
             self.runStrategy.call(self, strategy, i);
         });
-        return this;
     };
 
     Testone.prototype.runStrategy = function(strategy){
@@ -98,10 +109,8 @@ var testone = (function (){
             m, ms;
 
         endTime = now();
-
         strategyTime = endTime - startTime;
         strategyTimeSingle = strategyTime / this.iterations;
-
         passing = res.every(function (r) {return r.passing;});
 
         if (passing) {
@@ -181,6 +190,7 @@ var testone = (function (){
     Testone.prototype.checkMetrics = function(){
         var self = this,
             strategiesNames = Object.keys(this.times);
+        console.log({results: this.pluginsResults})
         if (this.passing && this.userMetrics) {
             this.metrics = Object.entries(this.userMetrics)
                 .reduce(function (acc, [metricName, metricFunc]) {
@@ -196,7 +206,6 @@ var testone = (function (){
                     return acc;
                 }, {});
         }
-        return this;
     };
 
     function tx(b, s, o) {
