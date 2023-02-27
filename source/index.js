@@ -33,6 +33,7 @@ var testone = (function (){
         this.mem = {};
         this.report = {};
         this.pluginsResults = {};
+        this.pluginsReportsForMetrics = {};
         this.passing = false;
         this.metrics = null;
         this.globs = [];
@@ -45,21 +46,42 @@ var testone = (function (){
         }
     }
     
+    Testone.prototype.preparePluginsReportForMetrics = function(){
+        this.pluginsReportsForMetrics = this.pluginsResults
+            // flatten
+            .reduce(function (acc, ext){
+                return acc.concat(ext)
+            }, [])
+            .reduce(function (acc, el) {
+                acc[el.pluginName] = acc[el.pluginName] || {}
+                acc[el.pluginName][el.strategyName] = el.results
+                return acc
+            }, {});
+    };
     Testone.prototype.run = function(){
         var self = this
         // first sync run
         this.runStrategies();
         // then async
-        return this.runPlugins().then(function(){
+        
+
+        return this.runPlugins().then(function(results){
+            self.pluginsResults = results;
+            
+            self.preparePluginsReportForMetrics()
             self.checkMetrics();
+            
+        }).then(function () {
             return Promise.resolve({
                 times: self.times,
                 mem: self.mem,
                 passing: self.passing,
                 report: self.report,
                 metrics: self.metrics,
-                pluginsReport: self.pluginsReport
+                // pluginsReport: self.pluginsReport
             });
+        }).catch(function (e){
+            console.log(e.message)
         });
     };
 
@@ -68,41 +90,37 @@ var testone = (function (){
             self = this;
         this.pluginsReport = null;
         if (this.passing && plugins) {
-            this.pluginsResults = this.strategies.reduce(
-                self.runPluginsOnStrategy.bind(self),
-                {}
-            );
+            var u =  Promise.all(this.strategies.map(function (strategy){
+                return self.runPluginsOnStrategy.bind(self)(strategy);
+            })); 
+            return u;
         }
-        return Promise.resolve({})
+        return Promise.reject({message: 'plugins can run only when all tests pass'})
     };
 
-
-
-    Testone.prototype.runPluginsOnStrategy = function(acc, strategy){
-        var self = this;
-        
-        var code = getCode(strategy),
+    Testone.prototype.runPluginsOnStrategy = function(strategy){
+        var self = this,
+            code = getCode(strategy),
             strategyName = strategy.name,
             plugins = this.options.plugins;
 
-        acc[strategyName] = plugins.reduce(function(iAcc, plugin){
-            var name = plugin.fn.name;
-            iAcc[name] = plugin.fn({
+        return Promise.all(plugins.map(function (plugin) {
+            return self.runPluginOnStrategy(plugin, {
                 source: code,
                 name: strategyName,
                 options: plugin.options
-            });
-            if (!plugin.skipReport) {
-                self.pluginsReport = self.pluginsReport || {}
-                self.pluginsReport[strategyName] = self.pluginsReport[strategyName] || {}
-                self.pluginsReport[strategyName][name] = iAcc[name]
-            }
-            return iAcc;
-        }, {});
-
-        return acc;
+            }).then(function(r) {
+                return Object.assign({}, {
+                    results: r,
+                    strategyName: strategyName,
+                    pluginName : plugin.fn.name
+                })
+            } );
+        }))
     };
-    Testone.prototype.runPluginOnStrategy = function(iAcc, plugin){};
+
+    Testone.prototype.runPluginOnStrategy = function(plugin, params){return plugin.fn(params);};
+
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
@@ -208,21 +226,26 @@ var testone = (function (){
     Testone.prototype.checkMetrics = function(){
         var self = this,
             strategiesNames = Object.keys(this.times);
-        // console.log({results: this.pluginsResults})
         if (this.passing && this.userMetrics) {
-            this.metrics = Object.entries(this.userMetrics)
-                .reduce(function (acc, [metricName, metricFunc]) {
-                    acc[metricName] = strategiesNames.reduce(function(iacc, strategyName){
-                        var param = {
-                            mem: self.mem[strategyName].raw,
-                            time: self.times[strategyName].raw,
-                            plugins: self.pluginsResults[strategyName]
-                        };
-                        iacc[strategyName] = metricFunc(param);
-                        return iacc;
-                    }, {});
+            this.metrics = Object.entries(this.userMetrics).reduce(
+                function (acc, [metricName, metricFunc]) {
+                    acc[metricName] = strategiesNames.reduce(
+                        function(iacc, strategyName){
+                            var param = {
+                                mem: self.mem[strategyName].raw,
+                                time: self.times[strategyName].raw,
+                            };
+                            if (metricName in self.pluginsReportsForMetrics && strategyName in self.pluginsReportsForMetrics[metricName]) {
+                                param.pluginsResults  = self.pluginsReportsForMetrics[metricName][strategyName]
+                            }
+                            // console.log(self.pluginsReportsForMetrics, metricName)
+                            iacc[strategyName] = metricFunc(param);
+                            return iacc;
+                        }, {}
+                    );
                     return acc;
-                }, {});
+                }, {}
+            );
         }
     };
 
