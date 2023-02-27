@@ -68,28 +68,41 @@ var testone = (function (){
             self = this;
         this.pluginsReport = null;
         if (this.passing && plugins) {
-            this.pluginsResults = this.strategies.reduce(function(acc, strategy){
-                var code = getCode(strategy),
-                    strategyName = strategy.name;
-                acc[strategyName] = plugins.reduce(function(iAcc, plugin){
-                    var name = plugin.fn.name;
-                    iAcc[name] = plugin.fn({
-                        source: code,
-                        name: strategyName,
-                        options: plugin.options
-                    });
-                    if (!plugin.skipReport) {
-                        self.pluginsReport = self.pluginsReport || {}
-                        self.pluginsReport[strategyName] = self.pluginsReport[strategyName] || {}
-                        self.pluginsReport[strategyName][name] = iAcc[name]
-                    }
-                    return iAcc;
-                }, {});
-                return acc;
-            }, {});
+            this.pluginsResults = this.strategies.reduce(
+                self.runPluginsOnStrategy.bind(self),
+                {}
+            );
         }
         return Promise.resolve({})
     };
+
+
+
+    Testone.prototype.runPluginsOnStrategy = function(acc, strategy){
+        var self = this;
+        
+        var code = getCode(strategy),
+            strategyName = strategy.name,
+            plugins = this.options.plugins;
+
+        acc[strategyName] = plugins.reduce(function(iAcc, plugin){
+            var name = plugin.fn.name;
+            iAcc[name] = plugin.fn({
+                source: code,
+                name: strategyName,
+                options: plugin.options
+            });
+            if (!plugin.skipReport) {
+                self.pluginsReport = self.pluginsReport || {}
+                self.pluginsReport[strategyName] = self.pluginsReport[strategyName] || {}
+                self.pluginsReport[strategyName][name] = iAcc[name]
+            }
+            return iAcc;
+        }, {});
+
+        return acc;
+    };
+    Testone.prototype.runPluginOnStrategy = function(iAcc, plugin){};
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
@@ -149,6 +162,7 @@ var testone = (function (){
     };
 
     Testone.prototype.matcher = function(a) { return JSON.stringify(a.received) === JSON.stringify(a.expected)};
+
     Testone.prototype.runBench = function(io, i, strategy) {
         var ret = {
                 passing: false,
