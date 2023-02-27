@@ -46,18 +46,21 @@ var testone = (function (){
     }
     
     Testone.prototype.run = function(){
+        var self = this
+        // first sync run
         this.runStrategies();
-        this.runPlugins();
-        this.checkMetrics();
-        var r = {
-            times: this.times,
-            mem: this.mem,
-            passing: this.passing,
-            report: this.report,
-            metrics: this.metrics,
-            pluginsReport: this.pluginsReport
-        };
-        return r;
+        // then async
+        return this.runPlugins().then(function(){
+            self.checkMetrics();
+            return Promise.resolve({
+                times: self.times,
+                mem: self.mem,
+                passing: self.passing,
+                report: self.report,
+                metrics: self.metrics,
+                pluginsReport: self.pluginsReport
+            });
+        });
     };
 
     Testone.prototype.runPlugins = function(){
@@ -85,6 +88,7 @@ var testone = (function (){
                 return acc;
             }, {});
         }
+        return Promise.resolve({})
     };
     Testone.prototype.runStrategies = function(){
         var self = this;
@@ -190,7 +194,7 @@ var testone = (function (){
     Testone.prototype.checkMetrics = function(){
         var self = this,
             strategiesNames = Object.keys(this.times);
-        console.log({results: this.pluginsResults})
+        // console.log({results: this.pluginsResults})
         if (this.passing && this.userMetrics) {
             this.metrics = Object.entries(this.userMetrics)
                 .reduce(function (acc, [metricName, metricFunc]) {
