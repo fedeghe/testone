@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.1.1)
+## testone (v. 0.1.2)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -276,20 +276,22 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > ## Plugin usage example  
 > 
 > Suppose we want to evaluate also the _cyclomatic complexity_ and find  
-> on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 5 minutes).  
+> on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 2 minutes goal).  
 > 
 > We can easily get 
 > - the _escomplex_ results for each strategy directly in the _testone_ output  
 > - consume the results also in the _metrics_ functions.  
 >  ``` js
 > import escomplex from 'escomplex'
-> const complex = ({source, options}) => escomplex.analyse(source, options)
+> const complex = ({source, options}) => Promise.resolve(
+>       escomplex.analyse(source, options)
+> )
 > /**
 >  * .
 >  * ...
 >  * .
 >  */
-> const res = testone(benchs, fns, {
+> const res = await testone(benchs, fns, {
 >     plugins: [{
 >         fn: complex,
 >         options: {/*
@@ -298,7 +300,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >         },
 >     }],
 >     metrics: {
->         cyclocplx: ({plugins: {complex}}) =>
+>         cyclocplx: ({pluginsResults: {complex}}) =>
 >           complex.aggregate.cyclomatic, /*
 >                 |
 >                 `-> this comes out of escomplex.analyse */
@@ -307,7 +309,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >           time: {single: time}
 >         }) => time * mem            
 >    }
-> }
+> })
 > ```  
 >
 > Cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options 3<sup>rd</sup> parameter;  
@@ -322,4 +324,4 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 
 ---
 
-🤟 last build on 19/2/2023  
+🤟 last build on 28/2/2023  

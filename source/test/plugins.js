@@ -14,13 +14,16 @@ var escomplex = require('escomplex'),
     
     // this is the full plugin ;) 
     function complex({source, options}) {
-        return escomplex.analyse(source, options)
+        return Promise.resolve(escomplex.analyse(source, options))
+    }
+    function complexFail({source, options}) {
+        return Promise.reject(null)
     }
 
     // this is another dumb plugin counting the number of lines
     function chars({source, options}) {
         // console.log({source})
-        return source.split().length
+        return Promise.resolve(source.split().length)
     }
 
 function j(json) {
@@ -28,8 +31,18 @@ function j(json) {
 }
 
 describe('plugins', () => {
-    it('should return the expected values', () => {
-        var res = testone([{
+    beforeEach(() => {
+        oldConsoleLog = console.warn;
+        console.warn = (...m) => {
+            console.warn.calls.push(m)
+        }
+        console.warn.calls = [];
+        console.warn.reset = () => {
+            console.warn.calls = [];
+        };
+    });
+    it('should return the expected values', async () => {
+        var res = await testone([{
                 in: [10],
                 out: 3628800
             },{
@@ -50,22 +63,67 @@ describe('plugins', () => {
                     options: {},
                 }],
                 metrics: {
-                    cyclocplx: ({plugins: {complex}}) => complex.aggregate.cyclomatic,
-                    ch: ({plugins: {chars}}) => chars
+                    cyclocplx: ({pluginsResults: {complex}}) => complex.aggregate.cyclomatic,
+                    ch: ({pluginsResults: {chars}}) => chars
                 }
             }
-        );
-
-        // j(res)
+        )
+        
         assert(res.metrics.cyclocplx.fac1 > 0);
         assert(res.metrics.cyclocplx.fac2 > 0);
         assert(res.metrics.ch.fac1 > 0);
         assert(res.metrics.ch.fac2 > 0);
-        assert('complex' in res.plugins.fac1);
-        assert('complex' in res.plugins.fac2);
-        assert('chars' in res.plugins.fac1);
-        assert('chars' in res.plugins.fac2);
+        
     });
-  
+    it('should warn when a plugin fails', async () => {
+            
+            var strat = [fac1, fac2],
+                res = await testone([{
+                in: [10],
+                out: 3628800
+            },{
+                in: [4],
+                out: ({received}) => received
+            },{
+                in: [4],
+                out: () => 24
+            }],
+            strat,
+            {
+                iterations: 1e3,
+                plugins: [{
+                    fn: complexFail,
+                    options: {}
+                },{
+                    fn: chars,
+                    options: {},
+                }],
+                metrics: {
+                    cyclocplx: ({pluginsResults: {complexFail}, mem: {fac1}}) => fac1 ? 333 : complexFail?.aggregate?.cyclomatic,
+                    ch: ({pluginsResults: {chars}}) => chars,
+                }
+            }
+        )
+        
+        
+        assert(console.warn.calls.length === 1);
+        assert(console.warn.calls[0][0] === 'WARNING: plugins can run only when all tests pass');
+        // both metrics and pluginsResults are empty objs
+        assert(res.metrics && Object.keys(res.metrics).length === 0);
+        assert(res.pluginsResults && Object.keys(res.pluginsResults).length === 0);
+        
+        
+        ['times', 'mem'].forEach(p1 => {
+            strat.forEach(s => {
+                var p2 = s.name;
+                ['raw', 'withLabel'].forEach(p3 => {
+                    ['single', 'total'].forEach(p4 => {
+                        assert(p4 in res[p1][p2][p3]);
+                    })
+                })
+            })
+        })  
+        
+    });
 });
 
