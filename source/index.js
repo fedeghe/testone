@@ -53,8 +53,8 @@ var testone = (function (){
                 return acc.concat(ext)
             }, [])
             .reduce(function (acc, el) {
-                acc[el.pluginName] = acc[el.pluginName] || {}
-                acc[el.pluginName][el.strategyName] = el.results
+                acc[el.strategyName] = acc[el.strategyName] || {}
+                acc[el.strategyName][el.pluginName] = el.results
                 return acc
             }, {});
     };
@@ -67,7 +67,6 @@ var testone = (function (){
 
         return this.runPlugins().then(function(results){
             self.pluginsResults = results;
-            
             self.preparePluginsReportForMetrics()
             self.checkMetrics();
             
@@ -90,12 +89,12 @@ var testone = (function (){
             self = this;
         this.pluginsReport = null;
         if (this.passing && plugins) {
-            var u =  Promise.all(this.strategies.map(function (strategy){
+            return Promise.all(this.strategies.map(function (strategy){
                 return self.runPluginsOnStrategy.bind(self)(strategy);
             })); 
-            return u;
         }
-        return Promise.reject({message: 'plugins can run only when all tests pass'})
+        console.warn('WARNING: plugins can run only when all tests pass');
+        return Promise.resolve([])
     };
 
     Testone.prototype.runPluginsOnStrategy = function(strategy){
@@ -235,10 +234,11 @@ var testone = (function (){
                                 mem: self.mem[strategyName].raw,
                                 time: self.times[strategyName].raw,
                             };
-                            if (metricName in self.pluginsReportsForMetrics && strategyName in self.pluginsReportsForMetrics[metricName]) {
-                                param.pluginsResults  = self.pluginsReportsForMetrics[metricName][strategyName]
-                            }
-                            // console.log(self.pluginsReportsForMetrics, metricName)
+                            // if (metricName in self.pluginsReportsForMetrics && strategyName in self.pluginsReportsForMetrics[metricName]) {
+                            //     param.pluginsResults  = self.pluginsReportsForMetrics[metricName][strategyName]
+                            // } else
+                            param.pluginsResults  = self.pluginsReportsForMetrics[strategyName]
+
                             iacc[strategyName] = metricFunc(param);
                             return iacc;
                         }, {}
