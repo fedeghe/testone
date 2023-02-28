@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.1.2)
+## testone (v. 0.1.3)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -29,7 +29,7 @@ const factorialMemoized = n => {
 /**
  * Run the test
  */
-const result = testone([{
+testone([{
         in: [20],
         out: 2432902008176640000
     }, {
@@ -40,9 +40,11 @@ const result = testone([{
         out: ({iteration}) => {let r = 1, i = iteration + 1; while(i > 0)r *= i--; return r;}
     }],
     [factorialRecursive, factorialIterative, factorialMemoized]
-)
+).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+})
 
-console.log(JSON.stringify(res, null, 2))
+
 // but we could for example have some jest 
 // test doing some comparison on `result` 
 ```
@@ -156,8 +158,8 @@ where:
             "factorialIterative": true,
             "factorialMemoized": true
         },
-        "metrics": null,
-        "plugins": {}
+        "metrics": {},
+        "pluginsResults": {}
     }
     ```
     </details>
@@ -229,8 +231,8 @@ where:
                 }
             ]
         },
-        "metrics": null,
-        "plugins": {}
+        "metrics": {},
+        "pluginsResults": {}
     }
     ```
     </details>
