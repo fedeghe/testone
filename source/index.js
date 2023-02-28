@@ -58,6 +58,7 @@ var testone = (function (){
                 return acc;
             }, {});
     };
+    
     Testone.prototype.run = function(){
         var self = this;
         // first sync run
@@ -77,8 +78,17 @@ var testone = (function (){
                 metrics: self.metrics,
                 // pluginsReport: self.pluginsReport
             });
-        }).catch(function (e){
-            console.error(e);
+        }).catch(function (){
+            
+            console.warn('WARNING: plugins can run only when all tests pass');
+            return Promise.resolve({
+                times: self.times,
+                mem: self.mem,
+                passing: self.passing,
+                report: self.report,
+                metrics: self.metrics,
+                pluginsResults: self.pluginsResults
+            });
         });
     };
 
@@ -89,9 +99,9 @@ var testone = (function (){
         if (this.passing && plugins) {
             return Promise.all(this.strategies.map(function (strategy){
                 return self.runPluginsOnStrategy.bind(self)(strategy);
-            })); 
+            }))
         }
-        console.warn('WARNING: plugins can run only when all tests pass');
+        
         return Promise.resolve([]);
     };
 
@@ -232,7 +242,9 @@ var testone = (function (){
                                 mem: self.mem[strategyName].raw,
                                 time: self.times[strategyName].raw,
                             };
-                            param.pluginsResults  = self.pluginsReportsForMetrics[strategyName];
+                            param.pluginsResults  = strategyName in self.pluginsReportsForMetrics
+                                ? self.pluginsReportsForMetrics[strategyName]
+                                : {};
                             iacc[strategyName] = metricFunc(param);
                             return iacc;
                         }, {}

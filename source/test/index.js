@@ -18,11 +18,13 @@ function j(json) {
 
 describe('basic testone', () => {
 
+    
+
     const fields1 = ['mem', 'times'],
           fields2 = ['raw', 'withLabel'];
 
-    it('should return the expected values, single strategy', () => {
-        var res = testone([{
+    it('should return the expected values, single strategy', async () => {
+        var res = await testone([{
             in: [10],
             out: 3628800
         },{
@@ -31,10 +33,8 @@ describe('basic testone', () => {
         },{
             in: [4],
             out: () => 24
-        }], fac1, {iterations:1e3});
-
-        // j(res)
-
+        }], fac1, {iterations:1e3})
+        
         fields1.forEach(k => {
             assert.ok('fac1' in res[k]);
             fields2.forEach(j => {
@@ -43,18 +43,19 @@ describe('basic testone', () => {
         });
         assert.ok(res.report.fac1);
         assert(res.passing);
+        
     });
 
-    it('should return the expected values, more strategies', () => {
+    it('should return the expected values, more strategies', async () => {
         var fns = [fac1, fac2],
-            res = testone([{
+            res = await testone([{
                 in: [10],
                 out: 3628800
             },{
                 in: [4],
                 out: 24
-            }], fns, {iterations:1e3});
-
+            }], fns, {iterations:1e3})
+        
         fns.forEach(fn => {
             var name = fn.name;
             
@@ -69,9 +70,9 @@ describe('basic testone', () => {
         assert.ok(res.passing);
     });
 
-    it('should fail as expected', () => {
+    it('should fail as expected', async () => {
         var fns = [fac1, fac2],
-            res = testone([{
+            res = await testone([{
                 in: [10],
                 out: 1
             },{
@@ -79,17 +80,16 @@ describe('basic testone', () => {
                 out: 6
             }], fns);
 
-        
         fns.forEach(fn => {
             assert(res.report[fn.name][0].passing === false)
             assert(res.report[fn.name][1].passing)
         });
-        assert(!res.passing);
+        assert(!res.passing);        
     });
 
-    it('should work as expected when using functions', () => {
+    it('should work as expected when using functions', async () => {
         var fns = [fac1, fac2, fac3, fac4],
-            res = testone([{
+            res = await testone([{
                 in: [3],
                 out: 6
             },{
@@ -102,12 +102,11 @@ describe('basic testone', () => {
                 in: () => [3],
                 out: n => 6
             }], fns);
-
         fns.forEach(fn => assert.ok(res.report[fn.name]));
         assert(res.passing);
     });
 
-    it('should work as expected when fails using functions', () => {
+    it('should work as expected when fails using functions', async () => {
         var strats = [fac1, fac2, fac3, fac4],
             ios = [{
                     in: [3],
@@ -125,12 +124,12 @@ describe('basic testone', () => {
                     out: n => 3
                 }
             ],
-            res = testone(ios, strats);
+            res = await testone(ios, strats);
 
         strats.forEach(strat => {
             var name = strat.name,
                 fields = ['received', 'expected', 'ioIndex'];
-         
+        
             fields.forEach(k => {
                 assert(res.report[name][0].passing === false)
                 assert(res.report[name][0].err.ioIndex === 0)
@@ -145,9 +144,9 @@ describe('basic testone', () => {
         assert(!res.passing);
     });
 
-    it('should work as expected when using metrics', () => {
+    it('should work as expected when using metrics', async () => {
         var fns = [fac1, fac2],
-            res = testone([{
+            res = await testone([{
                 in: [3],
                 out: 6
             },{
@@ -167,7 +166,7 @@ describe('basic testone', () => {
                     y : ({mem: {single: mem}}) => mem * 2
                 }
             });
-        // j(res)
+        
         fns.forEach(fn => 
             assert.ok(res.report[fn.name])
         );
@@ -182,9 +181,9 @@ describe('basic testone', () => {
 });
 
 describe('matcher overriding', () => {
-    it('should work as expected when using a global matcher', () => {
+    it('should work as expected when using a global matcher', async () => {
         var fn = (...n) => `${n.join('')}`,
-            res = testone([{
+            res = await testone([{
                 in: [3],
                 out: '3'
             },{
@@ -195,13 +194,14 @@ describe('matcher overriding', () => {
             {
                 matcher: ({received, expected}) => `${received}` === `${expected}`
             });
+    
         assert.ok(res.report[fn.name]);
         assert(res.passing);
     });
 
-    it('should work as expected when using a benchmark matcher', () => {
+    it('should work as expected when using a benchmark matcher', async () => {
         var fn = (...n) => `${n.join('')}`,
-            res = testone([
+            res = await testone([
                     {
                         in: [3],
                         out: '3.1',
@@ -216,57 +216,59 @@ describe('matcher overriding', () => {
                     matcher: ({received, expected}) => `${received}` === `${expected}`
                 }
             );
+        
         assert.ok(res.report[fn.name]);
         assert(res.passing);
     });
 });
 
 describe('static testone', () => {
-    it('should work as expected testone.formatTime', () => {
+    it('should work as expected testone.formatTime', async () => {
         //just to have a name
         function fn(x) {return testone.formatTime(x)}
-        var res = testone([{
-            in: [1e4],
-            out: '10 s'
-        },{
-            in: [10],
-            out: '10 ms'
-        },{
-            in: [0.001],
-            out: '1 µs'
-        },{
-            in: [0.000001],
-            out: '1 ns'
-        },{
-            in: [0],
-            out: '0 ns'
-        }], [fn])
+        var res = await testone([{
+                in: [1e4],
+                out: '10 s'
+            },{
+                in: [10],
+                out: '10 ms'
+            },{
+                in: [0.001],
+                out: '1 µs'
+            },{
+                in: [0.000001],
+                out: '1 ns'
+            },{
+                in: [0],
+                out: '0 ns'
+            }], [fn]);    
         assert.ok(res.report.fn);
         assert(res.passing);
     });
 
-    it('should work as expected testone.formatSize', () => {
+    it('should work as expected testone.formatSize', async () => {
         //just to have a name
         function fn(x) {return testone.formatSize(x)}
-        var res = testone([{
-            in: [2 ** 30],
-            out: '1 GB'
-        },{
-            in: [2 ** 20],
-            out: '1 MB'
-        },{
-            in: [1025],
-            out: '1.001 KB'
-        },{
-            in: [1024],
-            out: '1 KB'
-        },{
-            in: [1023],
-            out: '1023 B'
-        },{
-            in: [0],
-            out: '0 B'
-        }], [fn]);
+        var res = await testone([{
+                in: [2 ** 30],
+                out: '1 GB'
+            },{
+                in: [2 ** 20],
+                out: '1 MB'
+            },{
+                in: [1025],
+                out: '1.001 KB'
+            },{
+                in: [1024],
+                out: '1 KB'
+            },{
+                in: [1023],
+                out: '1023 B'
+            },{
+                in: [0],
+                out: '0 B'
+            }], [fn])
+            
         assert.ok(res.report.fn);
         assert(res.passing);
     });
