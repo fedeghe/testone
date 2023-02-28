@@ -50,26 +50,24 @@ var testone = (function (){
         this.pluginsReportsForMetrics = this.pluginsResults
             // flatten
             .reduce(function (acc, ext){
-                return acc.concat(ext)
+                return acc.concat(ext);
             }, [])
             .reduce(function (acc, el) {
-                acc[el.strategyName] = acc[el.strategyName] || {}
-                acc[el.strategyName][el.pluginName] = el.results
-                return acc
+                acc[el.strategyName] = acc[el.strategyName] || {};
+                acc[el.strategyName][el.pluginName] = el.results;
+                return acc;
             }, {});
     };
     Testone.prototype.run = function(){
-        var self = this
+        var self = this;
         // first sync run
         this.runStrategies();
         // then async
         
-
         return this.runPlugins().then(function(results){
             self.pluginsResults = results;
             self.preparePluginsReportForMetrics()
             self.checkMetrics();
-            
         }).then(function () {
             return Promise.resolve({
                 times: self.times,
@@ -80,7 +78,7 @@ var testone = (function (){
                 // pluginsReport: self.pluginsReport
             });
         }).catch(function (e){
-            console.log(e.message)
+            console.error(e);
         });
     };
 
@@ -94,7 +92,7 @@ var testone = (function (){
             })); 
         }
         console.warn('WARNING: plugins can run only when all tests pass');
-        return Promise.resolve([])
+        return Promise.resolve([]);
     };
 
     Testone.prototype.runPluginsOnStrategy = function(strategy){
@@ -113,9 +111,9 @@ var testone = (function (){
                     results: r,
                     strategyName: strategyName,
                     pluginName : plugin.fn.name
-                })
-            } );
-        }))
+                });
+            });
+        }));
     };
 
     Testone.prototype.runPluginOnStrategy = function(plugin, params){return plugin.fn(params);};
@@ -138,7 +136,7 @@ var testone = (function (){
             strategyTime,
             strategyTimeSingle,
             res = this.benchs.map(function (bench, j) {
-                return self.runBench.call(self, bench, j, strategy)
+                return self.runBench.call(self, bench, j, strategy);
             }),
             m, ms;
 
@@ -234,11 +232,7 @@ var testone = (function (){
                                 mem: self.mem[strategyName].raw,
                                 time: self.times[strategyName].raw,
                             };
-                            // if (metricName in self.pluginsReportsForMetrics && strategyName in self.pluginsReportsForMetrics[metricName]) {
-                            //     param.pluginsResults  = self.pluginsReportsForMetrics[metricName][strategyName]
-                            // } else
-                            param.pluginsResults  = self.pluginsReportsForMetrics[strategyName]
-
+                            param.pluginsResults  = self.pluginsReportsForMetrics[strategyName];
                             iacc[strategyName] = metricFunc(param);
                             return iacc;
                         }, {}
