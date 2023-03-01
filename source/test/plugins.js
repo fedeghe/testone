@@ -17,7 +17,7 @@ var escomplex = require('escomplex'),
         return Promise.resolve(escomplex.analyse(source, options))
     }
     function complexFail({source, options}) {
-        return Promise.reject(null)
+        return Promise.reject()
     }
 
     // this is another dumb plugin counting the number of lines
@@ -104,7 +104,6 @@ describe('plugins', () => {
                 }
             }
         )
-        
         
         assert(console.warn.calls.length === 1);
         assert(console.warn.calls[0][0] === 'WARNING: plugins can run only when all tests pass');
