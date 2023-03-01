@@ -29,7 +29,7 @@ const factorialMemoized = n => {
 /**
  * Run the test
  */
-testone([{
+const res = await testone([{
         in: [20],
         out: 2432902008176640000
     }, {
@@ -40,33 +40,30 @@ testone([{
         out: ({iteration}) => {let r = 1, i = iteration + 1; while(i > 0)r *= i--; return r;}
     }],
     [factorialRecursive, factorialIterative, factorialMemoized]
-).then(res => {
-    console.log(JSON.stringify(res, null, 2))
-})
+)
 
-
-// but we could for example have some jest 
-// test doing some comparison on `result` 
+assert(
+...
 ```
 where:
-- **1<sup>st</sup> parameter** (mandatory): an array of object literal keyed as follows:  
+- **1<sup>st</sup> parameter**: an array of object literal keyed as follows:  
     - **`in`** keyed element which can be either
         - array for the function inputs 
         - a function supposed to return an array to be used as input values (invoked passing `{benchIndex, iteration}`)
     - **`out`** keyed element which can be either
         - a static value  
         - a function invoked passing `{received, benchIndex, iteration}` supposed to return the expected output
-    - _`matcher`_ (optional)  
-        by default _testone_ compares the expected output with the result using the exact match between the stringyfication of the two as:  
+    - _`matcher`_   
+        by default _testone_ compares the expected output with the result using the exact match of the parts stringifycation:  
         ``` js
         JSON.stringify(expected) === JSON.stringify(received)
         ```   
-        but there might be anyway cases where a bit more flexibility is needed for a specific bechmark element, with this option is possible to override the matching function (which is anyway expected to return a boolean), e.g.:
+        but in some cases where more flexibility is needed for a specific bechmark element, with this option is possible to override the matching function (which is anyway expected to return a boolean), e.g.:
         ``` js
-        matcher: ({expected, received}) => received < expected 
+        matcher: ({expected, received}) => received.length === expected.length 
         ```  
 
-- **2<sup>nd</sup> parameter** (mandatory): the function or the array of functions one wants to test & check
+- **2<sup>nd</sup> parameter**: the function or the array of functions one wants to test & check
 - _3<sup>rd</sup> parameter_:  
     ```
     {
@@ -79,7 +76,7 @@ where:
     more info below about the 3<sup>rd</sup> and 4<sup>th</sup> optional parameters.
 
 
-### What do it get in the `outcome`?  
+### What out?  
 - check of the correctness
 - some relevant numerical performance informations
 
@@ -235,9 +232,10 @@ where:
         "pluginsResults": {}
     }
     ```
-    </details>
+    </details>  
 
-## Other options  
+
+## Options  
 As third parameter we can pass a literal object containing few additional things that might be usefull in some cases: 
 
 ### _**matcher**_  
@@ -275,19 +273,19 @@ and now in the returned metrics object we'll find for each metric something like
 One can write a plugin in **2 minutes** (when relying on some library for the heavy lifting) to do much more. A trivial example can clarify better than any _tl;dr_.
 
 
-> ## Plugin usage example  
+> ## Plain plugin example  
 > 
-> Suppose we want to evaluate also the _cyclomatic complexity_ and find  
-> on [npm](http://npmjs.com) one possible solution: [escomplex](https://www.npmjs.com/package/escomplex) (our heavy lifter toward the 2 minutes goal).  
+> Suppose we want to evaluate also the _cyclomatic complexity_ and we find one possible solution: the _**idothat**_ library (our heavy lifter toward the 2 minutes goal).  
 > 
 > We can easily get 
-> - the _escomplex_ results for each strategy directly in the _testone_ output  
+> - the _**idothat**_ results for each strategy directly in the _testone_ output  
 > - consume the results also in the _metrics_ functions.  
 >  ``` js
-> import escomplex from 'escomplex'
-> const complex = ({source, options}) => Promise.resolve(
->       escomplex.analyse(source, options)
-> )
+> import idothat from 'idothat'
+>
+> // every plugin must return a Promise
+> const pleaseDoThatForMe = ({source, options}) =>
+>       Promise.resolve(idothat(source))
 > /**
 >  * .
 >  * ...
@@ -295,17 +293,17 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >  */
 > const res = await testone(benchs, fns, {
 >     plugins: [{
->         fn: complex,
+>         fn: pleaseDoThatForMe,
 >         options: {/*
 >           here the options you want to
 >           be passed to the adapter */
 >         },
 >     }],
 >     metrics: {
->         cyclocplx: ({pluginsResults: {complex}}) =>
->           complex.aggregate.cyclomatic, /*
->                 |
->                 `-> this comes out of escomplex.analyse */
+>         cyclocplx: ({pluginsResults: {compleaseDoThatForMeplex}}) => /*
+>               output something base on compleaseDoThatForMeplex
+>               which contains the result for each strategy
+>               */ compleaseDoThatForMeplex.cplx,
 >         fx: ({
 >           mem: {single: mem},
 >           time: {single: time}
@@ -314,15 +312,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > })
 > ```  
 >
-> Cleary in that specific lucky case we could have used directly `escomplex.analyse` within the _testone_ options 3<sup>rd</sup> parameter;  
-> this cannot cleary always fit the lib we are exploiting since _testone_ will always calls the `plugin.fn` passing one literal object containing:  
-> ```
-> {
->     source: '<the source code of the strategy>',
->     options: '<the options object passed in the plugin.options>'
-> }
-> ```
-> first parameter the strategy code and as second parameter the `plugin.options`.
+
 
 ---
 
