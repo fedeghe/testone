@@ -1,6 +1,6 @@
-var escomplex = require('escomplex'),
-    assert = require('assert'),
+var assert = require('assert'),
     testone = require('../source/index.js'),
+
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
@@ -12,10 +12,6 @@ var escomplex = require('escomplex'),
     };
 
     
-    // this is the full plugin ;) 
-    function complex({source, options}) {
-        return Promise.resolve(escomplex.analyse(source, options))
-    }
     function complexFail({source, options}) {
         return Promise.reject()
     }
@@ -23,7 +19,11 @@ var escomplex = require('escomplex'),
     // this is another dumb plugin counting the number of lines
     function chars({source, options}) {
         // console.log({source})
-        return Promise.resolve(source.split().length)
+        return Promise.resolve({n: source.split().length})
+    }
+    function chars2({source, options}) {
+        // console.log({source})
+        return Promise.resolve({n2: source.split().length})
     }
 
 function j(json) {
@@ -56,61 +56,62 @@ describe('plugins', () => {
             {
                 iterations: 1e3,
                 plugins: [{
-                    fn: complex,
-                    options: {}
-                },{
                     fn: chars,
                     options: {},
+                },{
+                    fn: chars2,
+                    options: {},
+                    skipReport: true
                 }],
                 metrics: {
                     cyclocplx: ({
-                        pluginsResults: {
-                            complex: {complexity: {methodAggregate: {cyclomatic}}},
-                            chars
-                        }
-                    }) => {cyclomatic, chars},
-                    ch: ({pluginsResults: {chars}}) => chars
+                        pluginsResults: {chars}
+                    }) => chars,
+                    ch: ({pluginsResults: {chars: {n}}}) => parseInt(n, 10) * 2
                 }
             }
         )
         
-        assert(res.metrics.cyclocplx.fac1.cyclomatic > 0);
-        assert(res.metrics.cyclocplx.fac2.cyclomatic > 0);
-        assert(res.metrics.cyclocplx.fac1.chars > 0);
-        assert(res.metrics.cyclocplx.fac2.chars > 0);
+        assert(res.metrics.cyclocplx.fac1.n > 0);
+        assert(res.metrics.cyclocplx.fac2.n > 0);
         assert(res.metrics.ch.fac1 > 0);
         assert(res.metrics.ch.fac2 > 0);
+
+        // skipped
+        assert(res.pluginsResults.fac1.chars2 === 'skipped (you added skipReport: true setting the plugin named `chars2`)')
+        assert(res.pluginsResults.fac2.chars2 === 'skipped (you added skipReport: true setting the plugin named `chars2`)')
         
     });
     it('should warn when a plugin fails', async () => {
             
             var strat = [fac1, fac2],
-                res = await testone([{
-                in: [10],
-                out: 3628800
-            },{
-                in: [4],
-                out: ({received}) => received
-            },{
-                in: [4],
-                out: () => 24
-            }],
-            strat,
-            {
-                iterations: 1e3,
-                plugins: [{
-                    fn: complexFail,
-                    options: {}
-                },{
-                    fn: chars,
-                    options: {},
-                }],
-                metrics: {
-                    cyclocplx: ({pluginsResults: {complexFail}, mem: {fac1}}) => fac1 ? 333 : complexFail?.aggregate?.cyclomatic,
-                    ch: ({pluginsResults: {chars}}) => chars,
-                }
-            }
-        )
+                res = await testone(
+                    [{
+                        in: [10],
+                        out: 3628800
+                    },{
+                        in: [4],
+                        out: ({received}) => received
+                    },{
+                        in: [4],
+                        out: () => 24
+                    }],
+                    strat,
+                    {
+                        iterations: 1e3,
+                        plugins: [{
+                            fn: complexFail,
+                            options: {},
+                        },{
+                            fn: chars,
+                            options: {},
+                        }],
+                        metrics: {
+                            cyclocplx: ({pluginsResults: {complexFail}, mem: {fac1}}) => fac1 ? 333 : complexFail?.aggregate?.cyclomatic,
+                            ch: ({pluginsResults: {n}}) => n,
+                        }
+                    }
+                );
         
         assert(console.warn.calls.length === 1);
         assert(console.warn.calls[0][0] === 'WARNING: plugins can run only when all tests pass');
