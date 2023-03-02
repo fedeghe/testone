@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.1.4)
+## testone (v. 0.1.5)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -316,4 +316,4 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 
 ---
 
-🤟 last build on 1/3/2023  
+🤟 last build on 3/3/2023  

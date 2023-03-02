@@ -56,21 +56,7 @@ var testone = (function (){
             Testone.prototype.matcher = this.options.matcher;
         }
     }
-    
-    Testone.prototype.preparePluginsReportForMetrics = function(){
-        this.pluginsReportsForMetrics = this.pluginsResults
-            // flatten
-            .reduce(function (acc, ext){
-                return [...acc, ...ext];
-            }, [])
-            .reduce(function (acc, el) {
-                acc[el.strategyName] = acc[el.strategyName] || {};
-                if (!el.skipReport) {
-                    acc[el.strategyName][el.pluginName] = el.results;
-                }
-                return acc;
-            }, {});
-    };
+
 
     Testone.prototype.run = function(){
         var afterPlugins = this.afterPlugins.bind(this),
@@ -97,6 +83,8 @@ var testone = (function (){
                 acc[el.strategyName] = acc[el.strategyName] || {};
                 if (!el.skipReport) {
                     acc[el.strategyName][el.pluginName] = el.results;
+                } else {
+                    acc[el.strategyName][el.pluginName] = `skipped (you added skipReport: true setting the plugin named \`${el.pluginName}\`)`;
                 }
                 return acc;
             }, {});
