@@ -1,6 +1,6 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
@@ -28,10 +28,6 @@
         "nyc": "^15.1.0"
     },
     "dependencies": {
-        "complexity-report": "^2.0.0-alpha",
-        "escomplex": "^2.0.0-alpha",
-        "escomplex-ast-moz": "^0.2.1",
-        "esprima": "^4.0.1",
         "plato": "^1.7.0"
     }
 }
