@@ -276,18 +276,18 @@ var testone = (function (){
         var strategiesNames = Object.keys(this.times),
             collectMetricForStrategy = this.collectMetricForStrategy.bind(this);
         acc[metricName] = strategiesNames.reduce(function (iacc, strategyName){
-            return collectMetricForStrategy(iacc, strategyName, metricName, metricFunc)
+            return collectMetricForStrategy(iacc, strategyName, metricFunc)
         }, {});
         
         return acc;
     };
-    Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metricName, metricFunc){
+    Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metricFunc){
         var param = {
             mem: this.mem[strategyName].raw,
             time: this.times[strategyName].raw,
         };
-        param.pluginsResults  = metricName in this.pluginsReportsForMetrics[strategyName]
-            ? this.pluginsReportsForMetrics[strategyName][metricName]
+        param.pluginsResults  = strategyName in this.pluginsReportsForMetrics
+            ? this.pluginsReportsForMetrics[strategyName]
             : {};
         iacc[strategyName] = metricFunc(param);
         return iacc;
