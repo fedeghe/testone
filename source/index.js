@@ -26,34 +26,14 @@ var testone = (function (){
         };
     }
 
-    /**
-     * 
-     * @param {*} fn 
-     * @returns 
-     */
     function getCode(fn){
-        return `const ${fn.name} = ${fn}`
+        return `var ${fn.name} = ${fn}`
     }
 
-    /**
-     * 
-     * @returns 
-     */
     function now() {return +new Date();}
 
-    /**
-     * 
-     * @param {*} f 
-     * @returns 
-     */
     function isFunction(f){return typeof f === 'function';}
     
-    /**
-     * 
-     * @param {*} benchs 
-     * @param {*} strategies 
-     * @param {*} options 
-     */
     function Testone(benchs, strategies, options) {
         this.benchs = benchs;
         this.strategies = (strategies.constructor.name === 'Array') ? strategies : [strategies];
@@ -77,9 +57,6 @@ var testone = (function (){
         }
     }
     
-    /**
-     * 
-     */
     Testone.prototype.preparePluginsReportForMetrics = function(){
         this.pluginsReportsForMetrics = this.pluginsResults
             // flatten
@@ -95,25 +72,42 @@ var testone = (function (){
             }, {});
     };
 
-    /**
-     * 
-     * @returns Promise
-     */
     Testone.prototype.run = function(){
         var afterPlugins = this.afterPlugins.bind(this),
             resolveOrCatch = this.resolveOrCatch.bind(this);
         // sync run
         this.runStrategies();
-        return this.runPlugins().then(afterPlugins).then(function () {
-            return resolveOrCatch()
-        }).catch(function (e){
-            return resolveOrCatch(e || true)
-        });
+        return this.runPlugins()
+            .then(r => r
+                // flatten
+                .reduce(function (acc, ext){
+                    return [...acc, ...ext];
+                }, []))    
+            .then(afterPlugins).then(function () {
+                return resolveOrCatch()
+            }).catch(function (e){
+                return resolveOrCatch(e || true)
+            });
     };
 
-    Testone.prototype.afterPlugins = function(results){
-        this.pluginsResults = results;
-        this.preparePluginsReportForMetrics()
+    Testone.prototype.afterPlugins = function(flatResults){
+        this.pluginsResults = flatResults
+            // group by strategy excuding the skipReported
+            .reduce(function (acc, el) {
+                acc[el.strategyName] = acc[el.strategyName] || {};
+                if (!el.skipReport) {
+                    acc[el.strategyName][el.pluginName] = el.results;
+                }
+                return acc;
+            }, {});
+
+        this.pluginsReportsForMetrics = flatResults
+        .reduce(function (acc, el) {
+            acc[el.strategyName] = acc[el.strategyName] || {};
+            acc[el.strategyName][el.pluginName] = el.results;
+            return acc;
+        }, {});
+
         this.collectMetrics();
     };
 
@@ -124,6 +118,7 @@ var testone = (function (){
             passing: this.passing,
             report: this.report,
             metrics: this.metrics,
+            pluginsResults: this.pluginsResults
         };
         if (err) {
             console.log(err);
@@ -133,10 +128,6 @@ var testone = (function (){
         return Promise.resolve(res);
     };
 
-    /**
-     * 
-     * @returns Promise
-     */
     Testone.prototype.runPlugins = function(){
         var plugins = this.options.plugins,
             self = this;
@@ -149,11 +140,6 @@ var testone = (function (){
         return Promise.resolve([]);
     };
 
-    /**
-     * 
-     * @param {function} strategy 
-     * @returns 
-     */
     Testone.prototype.runPluginsOnStrategy = function(strategy){
         var self = this,
             code = getCode(strategy),
@@ -176,28 +162,17 @@ var testone = (function (){
         }));
     };
 
-    /**
-     * 
-     * @param {object} plugin 
-     * @param {object} params 
-     * @returns 
-     */
     Testone.prototype.runPluginOnStrategy = function(plugin, params){return plugin.fn(params);};
 
-    /**
-     * 
-     */
+    
+    Testone.prototype.matcher = function(a) { return JSON.stringify(a.received) === JSON.stringify(a.expected)};
     Testone.prototype.runStrategies = function(){
         var self = this;
         this.strategies.forEach(function (strategy, i){
             self.runStrategy.call(self, strategy, i);
         });
     };
-
-    /**
-     * 
-     * @param {function} strategy 
-     */
+    //
     Testone.prototype.runStrategy = function(strategy){
         var self = this,
             name = strategy.name,
@@ -248,21 +223,7 @@ var testone = (function (){
         this.report[name] = passing || res;
         this.passing = passing;
     };
-
-    /**
-     * 
-     * @param {*} a 
-     * @returns 
-     */
-    Testone.prototype.matcher = function(a) { return JSON.stringify(a.received) === JSON.stringify(a.expected)};
-
-    /**
-     * 
-     * @param {*} io 
-     * @param {*} i 
-     * @param {*} strategy 
-     * @returns 
-     */
+    //
     Testone.prototype.runBench = function(io, i, strategy) {
         var ret = {
                 passing: false,
@@ -304,58 +265,34 @@ var testone = (function (){
         }
         return ret;
     };
-    
-    /**
-     * 
-     */
+
     Testone.prototype.collectMetrics = function(){
         var collectMetricForStrategies = this.collectMetricForStrategies.bind(this)
         if (this.passing && this.userMetrics) {
             this.metrics = Object.entries(this.userMetrics).reduce(collectMetricForStrategies, {});
         }
     };
-
-    /**
-     * 
-     * @param {*} acc 
-     * @param {*} param1 
-     * @returns 
-     */
     Testone.prototype.collectMetricForStrategies = function (acc, [metricName, metricFunc]) {
         var strategiesNames = Object.keys(this.times),
             collectMetricForStrategy = this.collectMetricForStrategy.bind(this);
         acc[metricName] = strategiesNames.reduce(function (iacc, strategyName){
-            return collectMetricForStrategy(iacc, strategyName, metricFunc)
+            return collectMetricForStrategy(iacc, strategyName, metricName, metricFunc)
         }, {});
+        
         return acc;
     };
-
-    /**
-     * 
-     * @param {*} iacc 
-     * @param {*} strategyName 
-     * @param {*} metricFunc 
-     * @returns 
-     */
-    Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metricFunc){
+    Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metricName, metricFunc){
         var param = {
             mem: this.mem[strategyName].raw,
             time: this.times[strategyName].raw,
         };
-        param.pluginsResults  = strategyName in this.pluginsReportsForMetrics
-            ? this.pluginsReportsForMetrics[strategyName]
+        param.pluginsResults  = metricName in this.pluginsReportsForMetrics[strategyName]
+            ? this.pluginsReportsForMetrics[strategyName][metricName]
             : {};
         iacc[strategyName] = metricFunc(param);
         return iacc;
     };
 
-    /**
-     * 
-     * @param {*} b 
-     * @param {*} s 
-     * @param {*} o 
-     * @returns 
-     */
     function tx(b, s, o) {
         var t = new Testone(b, s, o);
         return t.run();
