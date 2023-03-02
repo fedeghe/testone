@@ -17,7 +17,7 @@ var escomplex = require('escomplex'),
         return Promise.resolve(escomplex.analyse(source, options))
     }
     function complexFail({source, options}) {
-        return Promise.reject(null)
+        return Promise.reject()
     }
 
     // this is another dumb plugin counting the number of lines
@@ -63,14 +63,21 @@ describe('plugins', () => {
                     options: {},
                 }],
                 metrics: {
-                    cyclocplx: ({pluginsResults: {complex}}) => complex.aggregate.cyclomatic,
+                    cyclocplx: ({
+                        pluginsResults: {
+                            complex: {complexity: {methodAggregate: {cyclomatic}}},
+                            chars
+                        }
+                    }) => {cyclomatic, chars},
                     ch: ({pluginsResults: {chars}}) => chars
                 }
             }
         )
         
-        assert(res.metrics.cyclocplx.fac1 > 0);
-        assert(res.metrics.cyclocplx.fac2 > 0);
+        assert(res.metrics.cyclocplx.fac1.cyclomatic > 0);
+        assert(res.metrics.cyclocplx.fac2.cyclomatic > 0);
+        assert(res.metrics.cyclocplx.fac1.chars > 0);
+        assert(res.metrics.cyclocplx.fac2.chars > 0);
         assert(res.metrics.ch.fac1 > 0);
         assert(res.metrics.ch.fac2 > 0);
         
@@ -104,7 +111,6 @@ describe('plugins', () => {
                 }
             }
         )
-        
         
         assert(console.warn.calls.length === 1);
         assert(console.warn.calls[0][0] === 'WARNING: plugins can run only when all tests pass');
