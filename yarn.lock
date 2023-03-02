@@ -388,11 +388,6 @@ assert-plus@1.0.0, assert-plus@^1.0.0:
   resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-1.0.0.tgz#f12e0f3c5d77b0b1cdd9146942e4e96c1e4dd525"
   integrity sha512-NfJ4UzBCcQGLDlQq7nHxH+tv3kyZ0hHQqF5BO6J7tNJeP5do1llPr8dZ8zHonfhAu0PHAdMkSo+8o0wxg9lZWw==
 
-async@^1.4.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
-  integrity sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==
-
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -505,9 +500,9 @@ camelcase@^6.0.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001449:
-  version "1.0.30001457"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001457.tgz#6af34bb5d720074e2099432aa522c21555a18301"
-  integrity sha512-SDIV6bgE1aVbK6XyxdURbUE89zY7+k1BBBaOwYwkNCglXlel/E7mELiHC64HQ+W0xSKlqWhV9Wh7iHxUjMs4fA==
+  version "1.0.30001458"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001458.tgz#871e35866b4654a7d25eccca86864f411825540c"
+  integrity sha512-lQ1VlUUq5q9ro9X+5gOEyH7i3vm+AYVT1WDCVB69XOZ17KZRhnZ9J0Sqz7wTHQaLBJccNCHq8/Ww5LlOIZbB0w==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -541,16 +536,6 @@ chalk@^4.0.0, chalk@^4.1.0:
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
-
-check-types@^4.2.0, check-types@~4:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/check-types/-/check-types-4.3.0.tgz#f743af84baa1e21a57a21bf6019b0e33eb6a12c1"
-  integrity sha512-Bio+lel1H6bZILbZNx+htTc13ir2AfgHIitBZHz3YV7XzMKOjyjV5ttwrqx9+MpI2J1b1c5cGZ1yebcWuudciQ==
-
-check-types@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/check-types/-/check-types-5.1.0.tgz#37394dd3b6042a51155e926c3a91753d499e5dc8"
-  integrity sha512-avyYsSECJeYxowzVMGxzwXz9gc+LAEQ8l8nDVRJqbJilfwHDBPxpjTZC0mb1gr8AAARDc/I7P4+IG6SxokWWmw==
 
 chokidar@3.5.1:
   version "3.5.1"
@@ -671,7 +656,7 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@^2.0.0, commander@^2.9.0:
+commander@^2.0.0:
   version "2.20.3"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
@@ -680,17 +665,6 @@ commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==
-
-complexity-report@^2.0.0-alpha:
-  version "2.0.0-alpha"
-  resolved "https://registry.yarnpkg.com/complexity-report/-/complexity-report-2.0.0-alpha.tgz#9f3b01e470b0ba11cca4726b42eb7f21aa043b1c"
-  integrity sha512-e9falJSmTSqCdZYnMKXuJcmDE9qkJec73HbZPi1fqzaurXdmUZosfZ19px/WCsMLRYN+bF5Ck+aV+p7YCHmipA==
-  dependencies:
-    async "^1.4.2"
-    check-types "^4.2.0"
-    commander "^2.9.0"
-    escomplex "2.0.0-alpha"
-    esprima "^2.7.2"
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -872,9 +846,9 @@ ecc-jsbn@~0.1.1:
     safer-buffer "^2.1.0"
 
 electron-to-chromium@^1.4.284:
-  version "1.4.309"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.309.tgz#82158606da135ffffc16a2e1eb853fa0a10955e7"
-  integrity sha512-U7DTiKe4h+irqBG6h4EZ0XXaZuJj4md3xIXXaGSYhwiumPZ4BSc6rgf9UD0hVUMaeP/jB0q5pKWCPxvhO8fvZA==
+  version "1.4.317"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.317.tgz#9a3d38a1a37f26a417d3d95dafe198ff11ed072b"
+  integrity sha512-JhCRm9v30FMNzQSsjl4kXaygU+qHBD0Yh7mKxyjmF0V8VwYVB6qpBRX28GyAucrM9wDCpSUctT6FpMUQxbyKuA==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -971,14 +945,6 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==
 
-escomplex-ast-moz@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/escomplex-ast-moz/-/escomplex-ast-moz-0.2.1.tgz#a04af98f4ad546377d94f824be501adc75269aa6"
-  integrity sha512-t+9iJky6zPi6h3nWlKK4GrPsgySl9sjNrFFY+OK2VucpcIWhZtKVGFHI1hONg3AKbXUZa1yejFSJNwOJIFdp9Q==
-  dependencies:
-    check-types "~4"
-    escomplex-traits "0.2.x"
-
 escomplex-plugin-metrics-module@^0.0.10:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/escomplex-plugin-metrics-module/-/escomplex-plugin-metrics-module-0.0.10.tgz#ea967cb12c123820d24e7ac04e4278a19bcfce83"
@@ -1007,18 +973,6 @@ escomplex-plugin-syntax-estree@^0.0.10:
   integrity sha512-QgQ1TT2lLB8419jFve9bWG6ePqdOBLbrXI0j9cE29UELMTP3NKexFqI/iXXiz2QPV3F77PzlVthqAANcRyrWbg==
   dependencies:
     typhonjs-escomplex-commons "^0.0.14"
-
-escomplex-traits@0.2.x:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/escomplex-traits/-/escomplex-traits-0.2.0.tgz#9a09aec21425a1de48969f7697d0529ebb18beaf"
-  integrity sha512-VYWD6OYlgNwMUNKn3bsE0zuIRPQsDXeqgmtQWzxPDR1mml6Ac3wrjacXMUYNrRPEl98TatVleUwVYqTDcLEoiQ==
-
-escomplex@2.0.0-alpha, escomplex@^2.0.0-alpha:
-  version "2.0.0-alpha"
-  resolved "https://registry.yarnpkg.com/escomplex/-/escomplex-2.0.0-alpha.tgz#fd6a79865d9baf57c4c3ed1b2fe677714e449606"
-  integrity sha512-svXitH4tBpW1CPLlGQOxZrqosDj/88GEIoul1bM7WpVGgBnp/5RXb2L0Fo62TAt56k1ZrqTgn+93vnLsAchCcw==
-  dependencies:
-    check-types "^5.1.0"
 
 escope@^3.6.0:
   version "3.6.0"
@@ -1077,12 +1031,7 @@ espree@^3.1.6:
     acorn "^5.5.0"
     acorn-jsx "^3.0.0"
 
-esprima@^2.7.2:
-  version "2.7.3"
-  resolved "https://registry.yarnpkg.com/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
-  integrity sha512-OarPfz0lFCiW4/AV2Oy1Rp9qu0iusTKqykwTspGCZtPxmF81JR4MmIebvF1F9+UOKth2ZubLQ4XGGaU+hSn99A==
-
-esprima@^4.0.0, esprima@^4.0.1:
+esprima@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-4.0.1.tgz#13b04cdb3e6c5d19df91ab6987a8695619b0aa71"
   integrity sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==
