@@ -254,7 +254,7 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     {
         time: { single, total },
         mem: { single, total },
-        plugins: {// see next section }
+        pluginsResults: {// see next section }
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
@@ -272,10 +272,16 @@ and now in the returned metrics object we'll find for each metric something like
 ### _**plugins**_  
 One can write a plugin in **2 minutes** (when relying on some library for the heavy lifting) to do much more. A trivial example can clarify better than any _tl;dr_.
 
+### Available plugins ? 
+I just wrote one: 
+- [testone-complexity-plugin](https://www.npmjs.com/package/testone-complexity-plugin) : using it you will get a lot if info about code complexity.
+
+... more are coming, anyway, create your is straighforward, 
+
 
 > ## Plain plugin example  
 > 
-> Suppose we want to evaluate also the _cyclomatic complexity_ and we find one possible solution: the _**idothat**_ library (our heavy lifter toward the 2 minutes goal).  
+> Suppose we want to use a library that can crunch our strategies code and we find one possible solution: a fantomatic  _**idothat**_ library (our heavy lifter toward the 2 minutes goal).  
 > 
 > We can easily get 
 > - the _**idothat**_ results for each strategy directly in the _testone_ output  
@@ -285,7 +291,7 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >
 > // every plugin must return a Promise
 > const pleaseDoThatForMe = ({source, options}) =>
->       Promise.resolve(idothat(source))
+>       Promise.resolve(idothat(source)) // resolve with {info: 'done'}
 > /**
 >  * .
 >  * ...
@@ -296,14 +302,16 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 >         fn: pleaseDoThatForMe,
 >         options: {/*
 >           here the options you want to
->           be passed to the adapter */
+>           be passed to the adapter / plugin */
 >         },
 >     }],
 >     metrics: {
->         cyclocplx: ({pluginsResults: {compleaseDoThatForMeplex}}) => /*
->               output something base on compleaseDoThatForMeplex
->               which contains the result for each strategy
->               */ compleaseDoThatForMeplex.cplx,
+>         cyclocplx: ({
+>            pluginsResults: {
+>               pleaseDoThatForMe: { info }
+>           },
+>           time: { single: time }
+>         }) => `${info} in ${time}`,
 >         fx: ({
 >           mem: {single: mem},
 >           time: {single: time}
@@ -312,7 +320,6 @@ One can write a plugin in **2 minutes** (when relying on some library for the he
 > })
 > ```  
 >
-
 
 ---
 
