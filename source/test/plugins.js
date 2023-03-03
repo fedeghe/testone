@@ -1,6 +1,5 @@
 var assert = require('assert'),
-    testone = require('../dist/index.js'),
-
+    testone = require('../source/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
@@ -11,20 +10,18 @@ var assert = require('assert'),
         return r;
     };
 
-    
-    function complexFail({source, options}) {
-        return Promise.reject()
-    }
+function complexFail({source, options}) {
+    return Promise.reject()
+}
 
-    // this is another dumb plugin counting the number of lines
-    function chars({source, options}) {
-        // console.log({source})
-        return Promise.resolve({n: source.split().length})
-    }
-    function chars2({source, options}) {
-        // console.log({source})
-        return Promise.resolve({n2: source.split().length})
-    }
+// this is another dumb plugin counting the number of lines
+function chars({source, options}) {
+    return Promise.resolve({n: source.split().length})
+}
+
+function chars2({source, options}) {
+    return Promise.resolve({n2: source.split().length})
+}
 
 function j(json) {
     console.log(JSON.stringify(json, null, 2))
@@ -76,10 +73,8 @@ describe('plugins', () => {
         assert(res.metrics.cyclocplx.fac2.n > 0);
         assert(res.metrics.ch.fac1 > 0);
         assert(res.metrics.ch.fac2 > 0);
-
-        // skipped
-        assert(res.pluginsResults.fac1.chars2 === 'skipped (you added skipReport: true setting the plugin named `chars2`)')
-        assert(res.pluginsResults.fac2.chars2 === 'skipped (you added skipReport: true setting the plugin named `chars2`)')
+        assert(res.pluginsResults.fac1.chars2 == 'skipped "chars2"')
+        assert(res.pluginsResults.fac2.chars2 == 'skipped "chars2"')
         
     });
     it('should warn when a plugin fails', async () => {
@@ -114,11 +109,10 @@ describe('plugins', () => {
                 );
         
         assert(console.warn.calls.length === 1);
-        assert(console.warn.calls[0][0] === 'WARNING: plugins can run only when all tests pass');
+        assert(console.warn.calls[0][0] === 'WARNING > plugins can run only when all tests pass');
         // both metrics and pluginsResults are empty objs
         assert(res.metrics && Object.keys(res.metrics).length === 0);
         assert(res.pluginsResults && Object.keys(res.pluginsResults).length === 0);
-        
         
         ['times', 'mem'].forEach(p1 => {
             strat.forEach(s => {

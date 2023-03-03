@@ -1,3 +1,4 @@
+const gc = require('expose-gc/function');
 /**
  * 
  */
@@ -82,7 +83,7 @@ var testone = (function (){
             .reduce(function (acc, el) {
                 acc[el.strategyName] = acc[el.strategyName] || {};
                 acc[el.strategyName][el.pluginName] = el.skipReport
-                    ? 'skipped (you added skipReport: true setting the plugin named `' + el.pluginName + '`)'
+                    ? `skipped "${el.pluginName}"`
                     : el.results; 
                 return acc;
             }, {});
@@ -108,7 +109,7 @@ var testone = (function (){
         };
         if (err) {
             console.log(err);
-            console.warn('WARNING: plugins can run only when all tests pass');
+            console.warn('WARNING > plugins can run only when all tests pass');
             res.pluginsResults = this.pluginsResults;
         }
         return Promise.resolve(res);
@@ -160,6 +161,7 @@ var testone = (function (){
     };
     //
     Testone.prototype.runStrategy = function(strategy){
+        gc();
         var self = this,
             name = strategy.name,
             memStart = process.memoryUsage().heapUsed,
