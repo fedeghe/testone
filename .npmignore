@@ -5,6 +5,7 @@
 /test
 /source
 /plugins
+/examples
 /.nyc_output
 .eslintrc
 .eslintignore

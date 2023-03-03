@@ -70,9 +70,9 @@ var testone = (function (){
                     return [...acc, ...ext];
                 }, []))    
             .then(afterPlugins).then(function () {
-                return resolveOrCatch()
+                return resolveOrCatch();
             }).catch(function (e){
-                return resolveOrCatch(e || true)
+                return resolveOrCatch(e || true);
             });
     };
 
@@ -81,20 +81,18 @@ var testone = (function (){
             // group by strategy excuding the skipReported
             .reduce(function (acc, el) {
                 acc[el.strategyName] = acc[el.strategyName] || {};
-                if (!el.skipReport) {
-                    acc[el.strategyName][el.pluginName] = el.results;
-                } else {
-                    acc[el.strategyName][el.pluginName] = `skipped (you added skipReport: true setting the plugin named \`${el.pluginName}\`)`;
-                }
+                acc[el.strategyName][el.pluginName] = el.skipReport
+                    ? 'skipped (you added skipReport: true setting the plugin named `' + el.pluginName + '`)'
+                    : el.results; 
                 return acc;
             }, {});
 
         this.pluginsReportsForMetrics = flatResults
-        .reduce(function (acc, el) {
-            acc[el.strategyName] = acc[el.strategyName] || {};
-            acc[el.strategyName][el.pluginName] = el.results;
-            return acc;
-        }, {});
+            .reduce(function (acc, el) {
+                acc[el.strategyName] = acc[el.strategyName] || {};
+                acc[el.strategyName][el.pluginName] = el.results;
+                return acc;
+            }, {});
 
         this.collectMetrics();
     };
@@ -255,7 +253,7 @@ var testone = (function (){
     };
 
     Testone.prototype.collectMetrics = function(){
-        var collectMetricForStrategies = this.collectMetricForStrategies.bind(this)
+        var collectMetricForStrategies = this.collectMetricForStrategies.bind(this);
         if (this.passing && this.userMetrics) {
             this.metrics = Object.entries(this.userMetrics).reduce(collectMetricForStrategies, {});
         }

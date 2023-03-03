@@ -29,7 +29,7 @@ const fibRecursive = n => {
     ];
 
     // one or an array of function to test
-var r = testone(
+ testone(
     ios,
     [fibRecursive, fibIterative],
     {
@@ -38,6 +38,5 @@ var r = testone(
             fkk: ({time, mem}) => time * mem**2
         }
     }
-);
+).then(r => console.log(JSON.stringify(r, null, 2)));
 
-console.log(JSON.stringify(r, null, 2))
