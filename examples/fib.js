@@ -34,8 +34,8 @@ const fibRecursive = n => {
     [fibRecursive, fibIterative],
     {
         metrics: {
-            fk: ({time, mem}) => time * mem,
-            fkk: ({time, mem}) => time * mem**2
+            fk: ({time: {single: time}, mem: {single: mem}}) => time * mem,
+            fkk: ({time: {single: time}, mem: {single: mem}}) => time * mem**2
         }
     }
 ).then(r => console.log(JSON.stringify(r, null, 2)));

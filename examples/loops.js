@@ -19,10 +19,8 @@ testone(
             fn: complex
         }],
         metrics: {
-            f : ({time, mem}) => time * mem,
-            fx : ({time, mem}) => time * mem,
-            cplx: ({pluginsResults: {complex}}) => complex
+            f : ({time: {single: time}, mem: {single: mem}}) => time * mem,
+            cplx: ({pluginsResults: {complex}}) => complex.complexity.methodAggregate.cyclomatic
         },
-        iterations : 200
     }
-).then(r => console.log(JSON.stringify(r, null, 2)));
+).then(r => console.log(JSON.stringify(r.metrics.f, null, 2)));
