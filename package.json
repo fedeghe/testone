@@ -29,7 +29,5 @@
         "mocha-lcov-reporter": "^1.3.0",
         "nyc": "^15.1.0"
     },
-    "dependencies": {
-        "plato": "^1.7.0"
-    }
+    "dependencies": {}
 }
