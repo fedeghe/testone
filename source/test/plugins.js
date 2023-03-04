@@ -39,7 +39,7 @@ describe('plugins', () => {
         };
     });
     it('should return the expected values', async () => {
-        var res = await testone([{
+        const res = await testone([{
                 in: [10],
                 out: 3628800
             },{
@@ -77,36 +77,36 @@ describe('plugins', () => {
         assert(res.pluginsResults.fac2.chars2 == 'skipped "chars2"')
         
     });
+
     it('should warn when a plugin fails', async () => {
-            
-            var strat = [fac1, fac2],
-                res = await testone(
-                    [{
-                        in: [10],
-                        out: 3628800
+        const strat = [fac1, fac2],
+            res = await testone(
+                [{
+                    in: [10],
+                    out: 3628800
+                },{
+                    in: [4],
+                    out: ({received}) => received
+                },{
+                    in: [4],
+                    out: () => 24
+                }],
+                strat,
+                {
+                    iterations: 1e3,
+                    plugins: [{
+                        fn: complexFail,
+                        options: {},
                     },{
-                        in: [4],
-                        out: ({received}) => received
-                    },{
-                        in: [4],
-                        out: () => 24
+                        fn: chars,
+                        options: {},
                     }],
-                    strat,
-                    {
-                        iterations: 1e3,
-                        plugins: [{
-                            fn: complexFail,
-                            options: {},
-                        },{
-                            fn: chars,
-                            options: {},
-                        }],
-                        metrics: {
-                            cyclocplx: ({pluginsResults: {complexFail}, mem: {fac1}}) => fac1 ? 333 : complexFail?.aggregate?.cyclomatic,
-                            ch: ({pluginsResults: {n}}) => n,
-                        }
+                    metrics: {
+                        cyclocplx: ({pluginsResults: {complexFail}, mem: {fac1}}) => fac1 ? 333 : complexFail?.aggregate?.cyclomatic,
+                        ch: ({pluginsResults: {n}}) => n,
                     }
-                );
+                }
+            );
         
         assert(console.warn.calls.length === 1);
         assert(console.warn.calls[0][0] === 'WARNING > plugins can run only when all tests pass');

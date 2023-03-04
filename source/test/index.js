@@ -18,8 +18,6 @@ function j(json) {
 
 describe('basic testone', () => {
 
-    
-
     const fields1 = ['mem', 'times'],
           fields2 = ['raw', 'withLabel'];
 
@@ -267,7 +265,7 @@ describe('static testone', () => {
             },{
                 in: [0],
                 out: '0 B'
-            }], [fn])
+            }], fn)
             
         assert.ok(res.report.fn);
         assert(res.passing);
