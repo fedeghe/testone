@@ -258,9 +258,10 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
+    operationsPerSecond: ({ops}}) => ops
 }
 ```
-and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
+and now in the returned metrics object we'll find for each metric something like:
 ``` json
 "aLabel": {
     "factorialRecursive": 11.053367999999999,

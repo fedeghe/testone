@@ -161,7 +161,8 @@ describe('basic testone', () => {
             {
                 metrics: {
                     x : ({time:{single: time}, mem: {single: mem}}) =>  time * mem,
-                    y : ({mem: {single: mem}}) => mem * 2
+                    y : ({mem: {single: mem}}) => mem * 2,
+                    ops: ({ops}) => ops
                 }
             });
         
@@ -173,6 +174,9 @@ describe('basic testone', () => {
         });
         Object.entries(res.metrics.y).forEach(([name, value]) => {
             assert(value === res.mem[name].raw.single * 2) 
+        });
+        Object.entries(res.metrics.ops).forEach(([name, value]) => {
+            assert(typeof value === 'number') 
         });
         assert(res.passing);
     });

@@ -248,6 +248,7 @@ Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metric
     const param = {
         mem: this.mem[strategyName].raw,
         time: this.times[strategyName].raw,
+        ops: 1000 / this.times[strategyName].raw.single
     };
     param.pluginsResults  = strategyName in this.pluginsReportsForMetrics
         ? this.pluginsReportsForMetrics[strategyName]

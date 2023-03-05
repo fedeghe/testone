@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.2.2)
+## testone (v. 0.2.3)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -258,9 +258,10 @@ for example a mixed indication fo the _memory consumption_ and _time spent_ in *
     }
     */
     aLabel: ({time: {single: time}, mem: {single: mem}}) => time * mem
+    operationsPerSecond: ({ops}}) => ops
 }
 ```
-and now in the returned metrics object we'll find for each metric something like (sorted by ascending value):
+and now in the returned metrics object we'll find for each metric something like:
 ``` json
 "aLabel": {
     "factorialRecursive": 11.053367999999999,
@@ -323,4 +324,4 @@ I just wrote one:
 
 ---
 
-🤟 last build on 4/3/2023  
+🤟 last build on 5/3/2023  
