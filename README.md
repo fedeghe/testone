@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. 0.2.3)
+## testone (v. 0.2.4)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -324,4 +324,4 @@ I just wrote one:
 
 ---
 
-🤟 last build on 5/3/2023  
+🤟 last build on 6/3/2023  

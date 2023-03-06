@@ -180,6 +180,19 @@ describe('basic testone', () => {
         });
         assert(res.passing);
     });
+    it('should work as expected when io functions', async () => {
+        var n = 0,
+            fns = [fac1, fac2],
+            res = await testone([{
+                    in: () => [3],
+                    out: () => {n++; return 6;}
+                }],
+                fns
+            );
+        
+        assert(n === testone.DEFAULT_ITERATIONS * fns.length)
+        assert(res.passing);
+    });
 });
 
 describe('matcher overriding', () => {
