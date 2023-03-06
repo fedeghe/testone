@@ -4,6 +4,7 @@ const gc = require('expose-gc/function');
  */
 
 const DEFAULT_ITERATIONS = 1e3,
+    DEFAULT_MATCHER = a => JSON.stringify(a.received) === JSON.stringify(a.expected),
     formatX = (map, base) => {
         return  (s, prec = 4) => {
             if (s == 0) return '0 ' + base;
@@ -128,7 +129,7 @@ Testone.prototype.runPluginsOnStrategy = function(strategy){
 
 Testone.prototype.runPluginOnStrategy = (plugin, params) => plugin.fn(params);
 
-Testone.prototype.matcher = a => JSON.stringify(a.received) === JSON.stringify(a.expected);
+Testone.prototype.matcher = DEFAULT_MATCHER
 
 Testone.prototype.runStrategies = function(){
     const runStrategy = this.runStrategy.bind(this);
@@ -185,9 +186,13 @@ Testone.prototype.runStrategy = function(strategy){
     this.passing = passing;
 };
 
+Testone.prototype.getMatcher = function(io) {
+    return isFunction(io.matcher) ? io.matcher : this.matcher;
+}
+
 Testone.prototype.runBench = function(io, i, strategy) {
     var ret = {
-            passing: false,
+            passing: true,
             time: 0
         },
         isFuncInput = isFunction(io.in),
@@ -198,14 +203,14 @@ Testone.prototype.runBench = function(io, i, strategy) {
     //================================
         ioStart = now(),
         ioEnd = 0,
-        matcher = isFunction(io.matcher) ? io.matcher : this.matcher;
+        matcher = this.getMatcher(io);
 
     while (j++ < this.iterations) {
         input = isFuncInput ? io.in({benchIndex: i, iteration: j}) : io.in;
         received = strategy.apply(null, input);
         expected = isFuncOut ? io.out({received: received, benchIndex: i, iteration: j}) : io.out;
-        if (!ranOnce) {
-            ret.passing = matcher({received: received, expected: expected});
+        if (!ranOnce || isFuncInput || isFuncOut) {
+            ret.passing = ret.passing && matcher({received: received, expected: expected});
             ranOnce = true;
         }
         // when failing prevent further iterations
@@ -260,6 +265,7 @@ Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metric
 const tx = (b, s, o) => (new Testone(b, s, o)).run();
 tx.formatSize = formatSize;
 tx.formatTime = formatTime;
+tx.DEFAULT_ITERATIONS = DEFAULT_ITERATIONS;
 
 /* istanbul ignore next */
 if (typeof exports === 'object' &&
