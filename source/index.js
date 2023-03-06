@@ -4,7 +4,7 @@ const gc = require('expose-gc/function');
  */
 
 const DEFAULT_ITERATIONS = 1e3,
-    DEFAULT_MATCHER = a => JSON.stringify(a.received) === JSON.stringify(a.expected),
+    DEFAULT_MATCHER = function (a) {return JSON.stringify(a.received) === JSON.stringify(a.expected)},
     formatX = (map, base) => {
         return  (s, prec = 4) => {
             if (s == 0) return '0 ' + base;
@@ -129,7 +129,7 @@ Testone.prototype.runPluginsOnStrategy = function(strategy){
 
 Testone.prototype.runPluginOnStrategy = (plugin, params) => plugin.fn(params);
 
-Testone.prototype.matcher = DEFAULT_MATCHER
+Testone.prototype.matcher = DEFAULT_MATCHER;
 
 Testone.prototype.runStrategies = function(){
     const runStrategy = this.runStrategy.bind(this);
@@ -188,7 +188,7 @@ Testone.prototype.runStrategy = function(strategy){
 
 Testone.prototype.getMatcher = function(io) {
     return isFunction(io.matcher) ? io.matcher : this.matcher;
-}
+};
 
 Testone.prototype.runBench = function(io, i, strategy) {
     var ret = {
