@@ -4,5 +4,6 @@ coverage
 .printVersion
 .coveralls.yml
 check.js
+checkx.js
 plugins
 test

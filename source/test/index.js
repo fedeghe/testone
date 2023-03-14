@@ -1,5 +1,5 @@
 const assert = require('assert'),
-    testone = require('../source/index.js'),
+    testone = require('../dist/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
@@ -167,7 +167,7 @@ describe('basic testone', () => {
                     ops: ({ops}) => ops
                 }
             });
-        
+
         fns.forEach(fn => 
             assert.ok(res.report[fn.name])
         );
