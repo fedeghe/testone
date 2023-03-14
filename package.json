@@ -1,6 +1,6 @@
 {
     "name": "@fedeghe/testone",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "description": "small testing utility",
     "scripts": {
         "build": "malta source/build.json",
@@ -29,7 +29,5 @@
         "mocha-lcov-reporter": "^1.3.0",
         "nyc": "^15.1.0"
     },
-    "dependencies": {
-        "expose-gc": "^1.0.0"
-    }
+    "dependencies": {}
 }
