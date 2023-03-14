@@ -39,7 +39,9 @@ describe('basic testone', () => {
                 assert.ok(j in res[k].fac1)
             });
         });
-        assert.ok(res.report.fac1);
+        assert('version' in testone)
+        assert('fac1' in res.ops && typeof res.ops.fac1 === 'number')
+        assert(res.report.fac1);
         assert(res.passing);
         
     });

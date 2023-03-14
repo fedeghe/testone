@@ -23,7 +23,8 @@ const DEFAULT_ITERATIONS = 1e3,
     formatTime = formatX({ m: 60e3, s: 1e3, ms: 1, µs: 1e-3, ns: 1e-6 }, 'ns'),
     getCode = fn => `var ${fn.name} = ${fn}`,
     now = () => +new Date(),
-    isFunction = f => typeof f === 'function';
+    isFunction = f => typeof f === 'function',
+    getOps = ms => 1000 / ms;
 
 function Testone(benchs, strategies, options) {
     this.benchs = benchs;
@@ -33,6 +34,7 @@ function Testone(benchs, strategies, options) {
     this.userMetrics = this.options.metrics || false;
     this.times = {};
     this.mem = {};
+    this.ops = {};
     this.report = {};
     this.pluginsResults = {};
     this.pluginsReport = null;
@@ -87,6 +89,7 @@ Testone.prototype.resolveOrCatch = function(err) {
     const res = {
         times: this.times,
         mem: this.mem,
+        ops: this.ops,
         passing: this.passing,
         report: this.report,
         metrics: this.metrics,
@@ -156,6 +159,7 @@ Testone.prototype.runStrategy = function(strategy){
     passing = res.every(r => r.passing);
 
     if (passing) {
+        this.ops[name] = getOps(strategyTimeSingle);
         this.times[name] = {
             raw: {
                 single: strategyTimeSingle,
@@ -253,7 +257,7 @@ Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metric
     const param = {
         mem: this.mem[strategyName].raw,
         time: this.times[strategyName].raw,
-        ops: 1000 / this.times[strategyName].raw.single
+        ops: getOps(this.times[strategyName].raw.single)
     };
     param.pluginsResults  = strategyName in this.pluginsReportsForMetrics
         ? this.pluginsReportsForMetrics[strategyName]
@@ -265,6 +269,7 @@ Testone.prototype.collectMetricForStrategy = function(iacc, strategyName, metric
 const tx = (b, s, o) => (new Testone(b, s, o)).run();
 tx.formatSize = formatSize;
 tx.formatTime = formatTime;
+tx.version = '$PACKAGE.version$';
 tx.DEFAULT_ITERATIONS = DEFAULT_ITERATIONS;
 
 /* istanbul ignore next */

@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## testone (v. $PACKAGE.version$)
+## $PACKAGE.name$ (v. $PACKAGE.version$)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -63,7 +63,11 @@ where:
         matcher: ({expected, received}) => received.length === expected.length 
         ```  
 
-- **2<sup>nd</sup> parameter**: the function or the array of functions one wants to test & check
+- **2<sup>nd</sup> parameter**: the function or the array of functions one wants to test & check  
+    **VERY IMPORTANT**: reports as of now need functions to be named; so if the suicdie hero in you want to beat a function from `_` be sure to wrap the `_` function and name it before running the test. Could be something like:
+    ``` js
+    function _Clone(o){return _.clone(o))}
+    ```
 - _3<sup>rd</sup> parameter_:  
     ```
     {
@@ -88,66 +92,71 @@ where:
         "times": {
             "factorialRecursive": {
                 "raw": {
-                    "single": 0.01,
-                    "total": 10
+                    "single": 0.0028,
+                    "total": 28
                 },
                 "withLabel": {
-                    "single": "10 µs",
-                    "total": "10 ms"
+                    "single": "2.8 µs",
+                    "total": "28 ms"
                 }
             },
             "factorialIterative": {
                 "raw": {
-                    "single": 0.003,
-                    "total": 3
+                    "single": 0.0007,
+                    "total": 7
                 },
                 "withLabel": {
-                    "single": "3 µs",
-                    "total": "3 ms"
+                    "single": "700 ns",
+                    "total": "7 ms"
                 }
             },
             "factorialMemoized": {
                 "raw": {
-                    "single": 0.003,
-                    "total": 3
+                    "single": 0.0006,
+                    "total": 6
                 },
                 "withLabel": {
-                    "single": "3 µs",
-                    "total": "3 ms"
+                    "single": "600 ns",
+                    "total": "6 ms"
                 }
             }
         },
         "mem": {
             "factorialRecursive": {
                 "raw": {
-                    "single": 1487.856,
-                    "total": 1487856
+                    "single": 101.2392,
+                    "total": 1012392
                 },
                 "withLabel": {
-                    "single": "1.453 KB",
-                    "total": "1.4189 MB"
+                    "single": "101.2392 B",
+                    "total": "988.6641 KB"
                 }
             },
             "factorialIterative": {
                 "raw": {
-                    "single": 1387.976,
-                    "total": 1387976
+                    "single": 81.624,
+                    "total": 816240
                 },
                 "withLabel": {
-                    "single": "1.3554 KB",
-                    "total": "1.3237 MB"
+                    "single": "81.624 B",
+                    "total": "797.1094 KB"
                 }
             },
             "factorialMemoized": {
                 "raw": {
-                    "single": 464.16,
-                    "total": 464160
+                    "single": 114.0096,
+                    "total": 1140096
                 },
                 "withLabel": {
-                    "single": "464.16 B",
-                    "total": "453.2813 KB"
+                    "single": "114.0096 B",
+                    "total": "1.0873 MB"
                 }
             }
+        },
+        "ops": {
+            "factorialRecursive": 357142.85714285716,
+            "factorialIterative": 1428571.4285714286,
+            "factorialMemoized": 1666666.6666666667
         },
         "passing": true,
         "report": {
@@ -155,7 +164,7 @@ where:
             "factorialIterative": true,
             "factorialMemoized": true
         },
-        "metrics": {},
+        "metrics": null,
         "pluginsResults": {}
     }
     ```
@@ -168,67 +177,68 @@ where:
     {
         "times": {},
         "mem": {},
+        "ops": {},
         "passing": false,
         "report": {
             "factorialRecursive": [
                 {
                     "passing": true,
-                    "time": 1
+                    "time": 6
                 },
                 {
                     "passing": false,
                     "time": 0,
                     "err": {
-                        "ioIndex": 1,
-                        "received": 51090942171709440000,
-                        "expected": 102181884343418880000
+                    "ioIndex": 1,
+                    "received": 51090942171709440000,
+                    "expected": 4865804016353280000
                     }
                 },
                 {
                     "passing": true,
-                    "time": 11
+                    "time": 7
                 }
             ],
             "factorialIterative": [
                 {
                     "passing": true,
-                    "time": 1
+                    "time": 4
                 },
                 {
                     "passing": false,
                     "time": 0,
                     "err": {
-                        "ioIndex": 1,
-                        "received": 51090942171709440000,
-                        "expected": 102181884343418880000
+                    "ioIndex": 1,
+                    "received": 51090942171709440000,
+                    "expected": 4865804016353280000
                     }
                 },
                 {
                     "passing": true,
-                    "time": 2
+                    "time": 0
                 }
             ],
             "factorialMemoized": [
                 {
                     "passing": true,
-                    "time": 0
+                    "time": 1
                 },
                 {
                     "passing": false,
                     "time": 0,
                     "err": {
-                        "ioIndex": 1,
-                        "received": 51090942171709440000,
-                        "expected": 102181884343418880000
+                    "ioIndex": 1,
+                    "received": 51090942171709440000,
+                    "expected": 4865804016353280000
                     }
                 },
                 {
                     "passing": true,
-                    "time": 1
+                    "time": 4
                 }
             ]
         },
-        "metrics": {},
+        "metrics": null,
         "pluginsResults": {}
     }
     ```
