@@ -1,7 +1,4 @@
 const Testone = (function (){
-
-    $$./Runner.js$$
-
     const DEFAULT_ITERATIONS = 1e3,
         DEFAULT_MATCHER = function (a) {return JSON.stringify(a.received) === JSON.stringify(a.expected)},
         formatX = (map, base) => {
@@ -98,7 +95,7 @@ const Testone = (function (){
         };
         maybeNode && (res.mem = this.mem);
         if (err) {
-            console.warn('WARNING > plugins can run only when all tests pass');
+            console.warn('Error: ', err);
             res.pluginsResults = this.pluginsResults;
         }
         return Promise.resolve(res);
@@ -125,7 +122,7 @@ const Testone = (function (){
             }).then(r => Object.assign({}, {
                     results: r,
                     strategyName: strategyName,
-                    pluginName : plugin.fn.name,
+                    pluginName :plugin.resultsLabel || plugin.fn.name,
                     skipReport: plugin.skipReport
                 })
             )
@@ -213,7 +210,7 @@ const Testone = (function (){
 
         while (j++ < this.iterations) {
             input = isFuncInput ? io.in({benchIndex: i, iteration: j}) : io.in;
-            received = Runner.run(strategy, input);
+            received = strategy.apply(null, input);
             expected = isFuncOut ? io.out({received: received, benchIndex: i, iteration: j}) : io.out;
             if (!ranOnce || isFuncInput || isFuncOut) {
                 ret.passing = ret.passing && matcher({received: received, expected: expected});

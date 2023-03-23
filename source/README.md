@@ -315,6 +315,21 @@ I just wrote one:
 >           here the options you want to
 >           be passed to the adapter / plugin */
 >         },
+>         resultsLabel: 'pleaseDoThatForMe', 
+>         /** some plugins export a named function; e.g. testone-complexity-plugin
+>           * exports a function named 'complex' but we could import is with another name
+>           * in the case of pleaseDoThatForMe it is not a problem cause it is the real name
+>           * but in the case of an external plugin the name differs and
+>           * there is no cuik way to know the real name
+>           * the point is that this hidden name is the one we need to know
+>           * when destructuring the plugin results in the metrics (inside pluginsResults).
+>           * This `resultLabel` allows to override the label that will be used shaping the 
+>           * object that will be passed to the metric functions 
+>           * the testone-complexity-plugin readme example clarifies that better
+>           *
+>           */
+>         skipReport: true // this will prevent the whole result of the plugin
+>                          // to be added in the output first-level pluginsResults
 >     }],
 >     metrics: {
 >         cyclocplx: ({
