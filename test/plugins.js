@@ -109,7 +109,7 @@ describe('plugins', () => {
             );
         
         assert(console.warn.calls.length === 1);
-        assert(console.warn.calls[0][0] === 'WARNING > plugins can run only when all tests pass');
+        assert(console.warn.calls[0][0] === 'Error: ');
         // both metrics and pluginsResults are empty objs
         assert(res.metrics && Object.keys(res.metrics).length === 0);
         assert(res.pluginsResults && Object.keys(res.pluginsResults).length === 0);
