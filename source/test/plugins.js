@@ -11,7 +11,7 @@ var assert = require('assert'),
     };
 
 function complexFail({source, options}) {
-    return Promise.reject('the cause')
+    return Promise.reject()
 }
 
 // this is another dumb plugin counting the number of lines

@@ -7,4 +7,5 @@ coverage
 check.js
 checkx.js
 plugins
-test
+.buildNum.json
+test/
