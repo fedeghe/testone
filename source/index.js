@@ -95,7 +95,7 @@ const Testone = (function (){
         };
         maybeNode && (res.mem = this.mem);
         if (err) {
-            console.warn('Error: ', err);
+            console.warn('Error:', err);
             res.pluginsResults = this.pluginsResults;
         }
         return Promise.resolve(res);

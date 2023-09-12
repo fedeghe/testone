@@ -11,7 +11,7 @@ var assert = require('assert'),
     };
 
 function complexFail({source, options}) {
-    return Promise.reject()
+    return Promise.reject('the cause')
 }
 
 // this is another dumb plugin counting the number of lines
@@ -23,9 +23,9 @@ function chars2({source, options}) {
     return Promise.resolve({n2: source.split().length})
 }
 
-function j(json) {
-    console.log(JSON.stringify(json, null, 2))
-}
+// function j(json) {
+//     console.log(JSON.stringify(json, null, 2))
+// }
 
 describe('plugins', () => {
     beforeEach(() => {
@@ -109,7 +109,7 @@ describe('plugins', () => {
             );
         
         assert(console.warn.calls.length === 1);
-        assert(console.warn.calls[0][0] === 'Error: ');
+        assert(console.warn.calls[0][0] === 'Error:');
         // both metrics and pluginsResults are empty objs
         assert(res.metrics && Object.keys(res.metrics).length === 0);
         assert(res.pluginsResults && Object.keys(res.pluginsResults).length === 0);
