@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## @fedeghe/testone (v. 0.2.8)
+## @fedeghe/testone (v. 0.2.9)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -64,7 +64,7 @@ where:
         ```  
 
 - **2<sup>nd</sup> parameter**: the function or the array of functions one wants to test & check  
-    **VERY IMPORTANT**: reports as of now need functions to be named; so if the suicdie hero in you want to beat a function from `_` be sure to wrap the `_` function and name it before running the test. Could be something like:
+    **VERY IMPORTANT**: reports as of now need functions to be named; so if the suicide hero in you is urged to beat a function from `_` be sure to wrap the `_` function and name it before running the test. Could be something like:
     ``` js
     function _Clone(o){return _.clone(o))}
     ```
@@ -349,4 +349,4 @@ I just wrote one:
 
 ---
 
-🤟 last build on 2/5/2023  
+🤟 last build on 12/9/2023  

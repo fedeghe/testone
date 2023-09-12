@@ -64,7 +64,7 @@ where:
         ```  
 
 - **2<sup>nd</sup> parameter**: the function or the array of functions one wants to test & check  
-    **VERY IMPORTANT**: reports as of now need functions to be named; so if the suicdie hero in you want to beat a function from `_` be sure to wrap the `_` function and name it before running the test. Could be something like:
+    **VERY IMPORTANT**: reports as of now need functions to be named; so if the suicide hero in you is urged to beat a function from `_` be sure to wrap the `_` function and name it before running the test. Could be something like:
     ``` js
     function _Clone(o){return _.clone(o))}
     ```
