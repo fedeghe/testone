@@ -289,4 +289,13 @@ describe('static testone', () => {
         assert.ok(res.report.fn);
         assert(res.passing);
     });
+    it('should catch a thrown exception', () => {
+        function fn() {throw 'error here'}
+        testone([{
+            in: [],
+            out: 'nevermind'
+        }], fn).catch(e => {
+            assert.ok(e instanceof Error);
+        })
+    })
 });

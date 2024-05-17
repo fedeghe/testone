@@ -79,6 +79,18 @@ where:
     ```
     more info below about the 3<sup>rd</sup> and 4<sup>th</sup> optional parameters.
 
+### Expect to throw ?
+When a tested function throws it is enough to catch the error.
+``` js
+const fn = () => {throw 'Error here'}
+testone([{
+        in: [],
+        out: ''
+    }],
+    fn
+).catch(e => console.log(e))
+```
+
 
 ### What out?  
 - check of the correctness
