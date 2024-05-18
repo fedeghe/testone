@@ -134,15 +134,8 @@ const Testone = (function (){
     Testone.prototype.matcher = DEFAULT_MATCHER;
 
     Testone.prototype.runStrategies = function(){
-        var self = this;
-        return new Promise((resolve, reject) => {
-            try {
-                const runStrategy = self.runStrategy.bind(self);
-                self.strategies.forEach(runStrategy);
-            } catch(e) {
-                reject(e);
-            }
-        });
+        const runStrategy = this.runStrategy.bind(this);
+        this.strategies.forEach(runStrategy);
     };
 
     Testone.prototype.runStrategy = function(strategy){

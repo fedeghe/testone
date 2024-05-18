@@ -1,5 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
-## @fedeghe/testone (v. 0.2.13)
+## @fedeghe/testone (v. 0.2.14)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
@@ -78,19 +78,6 @@ where:
     }  
     ```
     more info below about the 3<sup>rd</sup> and 4<sup>th</sup> optional parameters.
-
-### Expect to throw ?
-When a tested function throws it is enough to catch the error.
-``` js
-const fn = () => {throw 'Error here'}
-testone([{
-        in: [],
-        out: ''
-    }],
-    fn
-).catch(e => console.log(e))
-```
-
 
 ### What out?  
 - check of the correctness
