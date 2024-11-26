@@ -1,5 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
 ## @fedeghe/testone changelog <sub><sub>from version 0.2.6</sub></sub>
+- 0.2.15:
+    - use `performance.now()` instead of `+new Date()` for time tracking
 
 - 0.2.7:  
     - removed gc, not that relevant (on the long run the gc noise gets nulled)  

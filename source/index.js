@@ -21,13 +21,14 @@ const Testone = (function (){
         // bro or node ? 
         maybeNode = typeof process !== 'undefined',
         getHeapSize = () => process.memoryUsage().heapUsed,
-        now = () => +new Date(),
+        now = () => performance.now(),
         isFunction = f => typeof f === 'function',
         getOps = ms => 1000 / ms;
 
     function Testone(benchs, strategies, options) {
         this.benchs = benchs;
         this.strategies = (strategies.constructor.name === 'Array') ? strategies : [strategies];
+        this.timers = 
         this.options = options || {};
         this.iterations = this.options.iterations || DEFAULT_ITERATIONS;
         this.userMetrics = this.options.metrics || false;
