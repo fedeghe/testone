@@ -3,11 +3,15 @@
     "version": "0.2.15",
     "description": "small testing utility",
     "scripts": {
-        "build": "malta source/build.json",
         "dev": "malta source/builddev.json",
-        "test": "mocha",
-        "cover": "nyc yarn test && nyc report --reporter=html",
-        "coveralls": "nyc yarn test && nyc report --reporter=text-lcov | coveralls"
+        "build": "malta source/build.json",
+        "test": "jest",
+        "cover": "jest --coverage"
+    },
+    "jest": {
+        "testMatch": [
+            "<rootDir>/source/tests/**/*.js"
+        ]
     },
     "main": "dist/index.js",
     "repository": "https://github.com/fedeghe/testone.git",
@@ -20,13 +24,10 @@
     "author": "fedeghe <fedeghe@gmail.com>",
     "license": "MIT",
     "devDependencies": {
-        "coveralls": "^3.1.1",
-        "malta": "^4.1.36",
+        "jest": "^30.2.0",
+        "malta": "^4.1.43",
         "malta-header-comment": "^1.0.12",
-        "malta-millijs": "^1.0.5",
-        "malta-mocha": "^1.0.18",
-        "mocha": "^10.2.0",
-        "mocha-lcov-reporter": "^1.3.0",
-        "nyc": "^15.1.0"
+        "malta-jest": "^0.0.2",
+        "malta-millijs": "^1.0.5"
     }
 }

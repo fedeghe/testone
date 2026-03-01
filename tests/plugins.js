@@ -1,5 +1,4 @@
-var assert = require('assert'),
-    testone = require('../dist/index.js'),
+const testone = require('../../dist/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
@@ -28,16 +27,16 @@ function chars2({source, options}) {
 // }
 
 describe('plugins', () => {
+    let warnSpy;
+
     beforeEach(() => {
-        oldConsoleLog = console.warn;
-        console.warn = (...m) => {
-            console.warn.calls.push(m)
-        }
-        console.warn.calls = [];
-        console.warn.reset = () => {
-            console.warn.calls = [];
-        };
+        warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
+
+    afterEach(() => {
+        warnSpy.mockRestore();
+    });
+
     it('should return the expected values', async () => {
         const res = await testone([{
                 in: [10],
@@ -68,14 +67,14 @@ describe('plugins', () => {
                 }
             }
         )
-        
-        assert(res.metrics.cyclocplx.fac1.n > 0);
-        assert(res.metrics.cyclocplx.fac2.n > 0);
-        assert(res.metrics.ch.fac1 > 0);
-        assert(res.metrics.ch.fac2 > 0);
-        assert(res.pluginsResults.fac1.chars2 == 'skipped "chars2"')
-        assert(res.pluginsResults.fac2.chars2 == 'skipped "chars2"')
-        
+
+        expect(res.metrics.cyclocplx.fac1.n).toBeGreaterThan(0);
+        expect(res.metrics.cyclocplx.fac2.n).toBeGreaterThan(0);
+        expect(res.metrics.ch.fac1).toBeGreaterThan(0);
+        expect(res.metrics.ch.fac2).toBeGreaterThan(0);
+        expect(res.pluginsResults.fac1.chars2).toBe('skipped "chars2"')
+        expect(res.pluginsResults.fac2.chars2).toBe('skipped "chars2"')
+
     });
 
     it('should warn when a plugin fails', async () => {
@@ -107,24 +106,23 @@ describe('plugins', () => {
                     }
                 }
             );
-        
-        assert(console.warn.calls.length === 1);
-        assert(console.warn.calls[0][0] === 'Error:');
+
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+        expect(warnSpy.mock.calls[0][0]).toBe('Error:');
         // both metrics and pluginsResults are empty objs
-        assert(res.metrics && Object.keys(res.metrics).length === 0);
-        assert(res.pluginsResults && Object.keys(res.pluginsResults).length === 0);
-        
+        expect(res.metrics && Object.keys(res.metrics).length === 0).toBe(true);
+        expect(res.pluginsResults && Object.keys(res.pluginsResults).length === 0).toBe(true);
+
         ['times', 'mem'].forEach(p1 => {
             strat.forEach(s => {
                 var p2 = s.name;
                 ['raw', 'withLabel'].forEach(p3 => {
                     ['single', 'total'].forEach(p4 => {
-                        assert(p4 in res[p1][p2][p3]);
+                        expect(p4 in res[p1][p2][p3]).toBe(true);
                     })
                 })
             })
-        })  
-        
+        })
+
     });
 });
-

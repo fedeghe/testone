@@ -1,5 +1,4 @@
-const assert = require('assert'),
-    testone = require('../dist/index.js'),
+const testone = require('../../dist/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);
@@ -32,18 +31,18 @@ describe('basic testone', () => {
             in: [4],
             out: () => 24
         }], fac1, {iterations:1e3})
-        
+
         fields1.forEach(k => {
-            assert.ok('fac1' in res[k]);
+            expect('fac1' in res[k]).toBe(true);
             fields2.forEach(j => {
-                assert.ok(j in res[k].fac1)
+                expect(j in res[k].fac1).toBe(true)
             });
         });
-        assert('version' in testone)
-        assert('fac1' in res.ops && typeof res.ops.fac1 === 'number')
-        assert(res.report.fac1);
-        assert(res.passing);
-        
+        expect('version' in testone).toBe(true)
+        expect('fac1' in res.ops && typeof res.ops.fac1 === 'number').toBe(true)
+        expect(res.report.fac1).toBeTruthy();
+        expect(res.passing).toBe(true);
+
     });
 
     it('should return the expected values, more strategies', async () => {
@@ -55,19 +54,19 @@ describe('basic testone', () => {
                 in: [4],
                 out: 24
             }], fns, {iterations:1e3})
-        
+
         fns.forEach(fn => {
             var name = fn.name;
-            
+
             fields1.forEach(n => {
-                assert.ok(name in res[n]);
-                fields2.forEach(k => 
-                    assert.ok(k in res[n][name])
+                expect(name in res[n]).toBe(true);
+                fields2.forEach(k =>
+                    expect(k in res[n][name]).toBe(true)
                 );
             });
-            assert.ok(res.report[name]);
+            expect(res.report[name]).toBeTruthy();
         });
-        assert.ok(res.passing);
+        expect(res.passing).toBe(true);
     });
 
     it('should fail as expected', async () => {
@@ -81,10 +80,10 @@ describe('basic testone', () => {
             }], fns);
 
         fns.forEach(fn => {
-            assert(res.report[fn.name][0].passing === false)
-            assert(res.report[fn.name][1].passing)
+            expect(res.report[fn.name][0].passing).toBe(false)
+            expect(res.report[fn.name][1].passing).toBe(true)
         });
-        assert(!res.passing);        
+        expect(res.passing).toBe(false);
     });
 
     it('should work as expected when using functions', async () => {
@@ -102,8 +101,8 @@ describe('basic testone', () => {
                 in: () => [3],
                 out: n => 6
             }], fns);
-        fns.forEach(fn => assert.ok(res.report[fn.name]));
-        assert(res.passing);
+        fns.forEach(fn => expect(res.report[fn.name]).toBeTruthy());
+        expect(res.passing).toBe(true);
     });
 
     it('should work as expected when fails using functions', async () => {
@@ -129,19 +128,19 @@ describe('basic testone', () => {
         strats.forEach(strat => {
             var name = strat.name,
                 fields = ['received', 'expected', 'ioIndex'];
-        
+
             fields.forEach(k => {
-                assert(res.report[name][0].passing === false)
-                assert(res.report[name][0].err.ioIndex === 0)
-                assert(res.report[name][0].err.received !== res.report[name][0].err.expected)
-                assert(res.report[name][1].passing)
-                assert(res.report[name][2].passing)
-                assert(res.report[name][3].passing === false)
-                assert(res.report[name][3].err.ioIndex === 3)
-                assert(res.report[name][3].err.received !== res.report[name][3].err.expected)
+                expect(res.report[name][0].passing).toBe(false)
+                expect(res.report[name][0].err.ioIndex).toBe(0)
+                expect(res.report[name][0].err.received).not.toBe(res.report[name][0].err.expected)
+                expect(res.report[name][1].passing).toBe(true)
+                expect(res.report[name][2].passing).toBe(true)
+                expect(res.report[name][3].passing).toBe(false)
+                expect(res.report[name][3].err.ioIndex).toBe(3)
+                expect(res.report[name][3].err.received).not.toBe(res.report[name][3].err.expected)
             });
         });
-        assert(!res.passing);
+        expect(res.passing).toBe(false);
     });
 
     it('should work as expected when using metrics', async () => {
@@ -168,19 +167,19 @@ describe('basic testone', () => {
                 }
             });
 
-        fns.forEach(fn => 
-            assert.ok(res.report[fn.name])
+        fns.forEach(fn =>
+            expect(res.report[fn.name]).toBeTruthy()
         );
         Object.entries(res.metrics.x).forEach(([name, value]) => {
-            assert(value === res.mem[name].raw.single * res.times[name].raw.single) 
+            expect(value).toBe(res.mem[name].raw.single * res.times[name].raw.single)
         });
         Object.entries(res.metrics.y).forEach(([name, value]) => {
-            assert(value === res.mem[name].raw.single * 2) 
+            expect(value).toBe(res.mem[name].raw.single * 2)
         });
         Object.entries(res.metrics.ops).forEach(([name, value]) => {
-            assert(typeof value === 'number') 
+            expect(typeof value).toBe('number')
         });
-        assert(res.passing);
+        expect(res.passing).toBe(true);
     });
     it('should work as expected when io functions', async () => {
         var n = 0,
@@ -191,9 +190,9 @@ describe('basic testone', () => {
                 }],
                 fns
             );
-        
-        assert(n === testone.DEFAULT_ITERATIONS * fns.length)
-        assert(res.passing);
+
+        expect(n).toBe(testone.DEFAULT_ITERATIONS * fns.length)
+        expect(res.passing).toBe(true);
     });
 });
 
@@ -211,9 +210,9 @@ describe('matcher overriding', () => {
             {
                 matcher: ({received, expected}) => `${received}` === `${expected}`
             });
-    
-        assert.ok(res.report[fn.name]);
-        assert(res.passing);
+
+        expect(res.report[fn.name]).toBeTruthy();
+        expect(res.passing).toBe(true);
     });
 
     it('should work as expected when using a benchmark matcher', async () => {
@@ -233,9 +232,9 @@ describe('matcher overriding', () => {
                     matcher: ({received, expected}) => `${received}` === `${expected}`
                 }
             );
-        
-        assert.ok(res.report[fn.name]);
-        assert(res.passing);
+
+        expect(res.report[fn.name]).toBeTruthy();
+        expect(res.passing).toBe(true);
     });
 });
 
@@ -258,9 +257,9 @@ describe('static testone', () => {
             },{
                 in: [0],
                 out: '0 ns'
-            }], [fn]);    
-        assert.ok(res.report.fn);
-        assert(res.passing);
+            }], [fn]);
+        expect(res.report.fn).toBeTruthy();
+        expect(res.passing).toBe(true);
     });
 
     it('should work as expected testone.formatSize', async () => {
@@ -285,9 +284,9 @@ describe('static testone', () => {
                 in: [0],
                 out: '0 B'
             }], fn)
-            
-        assert.ok(res.report.fn);
-        assert(res.passing);
+
+        expect(res.report.fn).toBeTruthy();
+        expect(res.passing).toBe(true);
     });
     // it('should catch a thrown exception', () => {
     //     function fn() {throw 'error here'}
@@ -295,7 +294,7 @@ describe('static testone', () => {
     //         in: [],
     //         out: 'nevermind'
     //     }], fn).catch(e => {
-    //         assert.ok(e instanceof Error);
+    //         expect(e instanceof Error).toBe(true);
     //     })
     // })
 });

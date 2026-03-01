@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/fedeghe/testone/badge.svg?branch=master)](https://coveralls.io/github/fedeghe/testone?branch=master)
+[![codecov](https://codecov.io/gh/fedeghe/testone/graph/badge.svg?token=MGGELRQA9J)](https://codecov.io/gh/fedeghe/testone)
 ## $PACKAGE.name$ (v. $PACKAGE.version$)
 
 Quickly test performance and correctness of one or more functions against input/output data.  

@@ -1,9 +1,9 @@
 {
     "EXE": [
-        "rm -rf test",
-        "mkdir test"
+        "rm -rf tests",
+        "mkdir tests"
     ],
     "#source/index.js": "./dist -plugins=malta-millijs...malta-header-comment[name:'source/head.txt']",
-    "#source/test/*.js": "./test",
+    "#source/tests/*.js": "./tests",
     "#source/*.md": "."
 }
