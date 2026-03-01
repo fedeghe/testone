@@ -1,4 +1,4 @@
-const testone = require('../../dist/index.js'),
+const testone = require('../dist/index.js'),
     fac1 = n => {
         if (n === 1) return 1;
         else return n * fac1(n - 1);

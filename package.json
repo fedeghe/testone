@@ -10,7 +10,7 @@
     },
     "jest": {
         "testMatch": [
-            "<rootDir>/source/tests/**/*.js"
+            "<rootDir>/tests/**/*.js"
         ]
     },
     "main": "dist/index.js",
