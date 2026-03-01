@@ -1,5 +1,5 @@
 [![codecov](https://codecov.io/gh/fedeghe/testone/graph/badge.svg?token=MGGELRQA9J)](https://codecov.io/gh/fedeghe/testone)
-## @fedeghe/testone (v. 0.2.15)
+## @fedeghe/testone (v. 0.2.16)
 
 Quickly test performance and correctness of one or more functions against input/output data.  
 
